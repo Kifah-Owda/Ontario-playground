@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Share a New Safe Space — Kindred Play</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Be+Vietnam+Pro:wght@400;600;700&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400,0,0&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"
+      integrity="sha512-h9FcoyWjHcOcmEVkxOfTLnmZFWIH0iZhZT1H2TbOq55xssQGEJHEaIm+PgoUaZbRvQTNTluNOEfb1ZRy6D3BOw==" crossorigin="anonymous">
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="brand" href="/">Kindred Play</a>
+  <nav class="site-nav" aria-label="Main">
+    <a href="/#explore">Find a Park</a>
+    <a href="/about.html">About</a>
+    <a href="/admin.html">Admin</a>
+    <a class="btn btn-primary btn-sm" href="/submit.html" aria-current="page"><span class="ms" aria-hidden="true">add_location</span> Add a Park</a>
+  </nav>
+</header>
+
+<main class="wizard-wrap">
+  <div class="wizard-head">
+    <h1>Share a New Safe Space</h1>
+    <p style="color:var(--ink-soft)">Help our community grow by adding a playground, splash pad, or beach that makes every child feel welcome.</p>
+  </div>
+
+  <p id="update-notice" class="notice info hidden"></p>
+  <p id="form-error" class="notice err hidden" role="alert"></p>
+
+  <form id="wizard" novalidate>
+    <div class="steps" aria-label="Progress">
+      <div class="bar done" data-s="1"></div><div class="bar" data-s="2"></div>
+      <div class="bar" data-s="3"></div><div class="bar" data-s="4"></div>
+      <span class="label" id="step-label">Step 1 of 4</span>
+    </div>
+
+    <div class="wizard-body">
+      <!-- Step 1: type + where -->
+      <section class="step-panel" data-step="1">
+        <h2>Where is the magic?</h2>
+        <div class="field full"><label>What kind of place is this?</label>
+          <div class="type-cards" id="type-cards" role="group" aria-label="Location type"></div>
+        </div>
+        <div class="form-grid">
+          <div class="field full"><label for="p-name">Name *</label>
+            <input id="p-name" type="text" required maxlength="200" placeholder="e.g. Whispering Oaks Play Garden" list="park-names">
+            <datalist id="park-names"></datalist>
+            <small id="dup-hint" class="hidden" style="color:var(--secondary)"></small>
+          </div>
+          <div class="field" id="geo-field"><label for="p-search">Location search</label>
+            <div class="search-box" style="box-shadow:none;border:1px solid var(--sage)">
+              <span class="ms" aria-hidden="true">search</span>
+              <input id="p-search" type="search" placeholder="Search address or place name…">
+            </div>
+            <small id="geo-msg" style="color:var(--muted)"></small>
+          </div>
+          <div class="field"><label for="p-address">Address (manual fallback)</label>
+            <input id="p-address" type="text" maxlength="255" placeholder="Enter address manually if search fails…">
+          </div>
+          <div class="field"><label for="p-city">City / town</label>
+            <input id="p-city" type="text" maxlength="120" placeholder="e.g. Sudbury">
+          </div>
+          <div class="field">
+            <label>Coordinates *</label>
+            <div style="display:flex;gap:0.5rem">
+              <input id="p-lat" type="number" step="any" placeholder="Latitude" aria-label="Latitude" required>
+              <input id="p-lng" type="number" step="any" placeholder="Longitude" aria-label="Longitude" required>
+            </div>
+            <small><button type="button" class="linkbtn" id="use-gps">Use my location</button> · or tap the map to drop a pin</small>
+          </div>
+          <div class="full">
+            <div id="pick-map" class="pickmap" aria-label="Map location picker. Tap to place the pin."></div>
+            <small style="color:var(--muted)">Drag the pin or use search to set the precise location.</small>
+          </div>
+        </div>
+      </section>
+
+      <!-- Step 2: facilities & accessibility -->
+      <section class="step-panel" data-step="2" hidden>
+        <h2>What will families find?</h2>
+        <div class="form-grid">
+          <div class="field"><label>Washroom nearby?</label><div class="tri" data-tri="washroom"></div></div>
+          <div class="field"><label for="p-water">Water fountains (count)</label>
+            <input id="p-water" type="number" min="0" max="50" placeholder="e.g. 1"></div>
+          <div class="field"><label>Parking available?</label><div class="tri" data-tri="parking"></div></div>
+          <div class="field"><label>Shaded areas?</label><div class="tri" data-tri="shade"></div></div>
+          <div class="field" data-only="playground"><label>Fenced play area?</label><div class="tri" data-tri="fenced"></div></div>
+          <div class="field" data-only="splash_pad beach"><label>Accessible water entry (ramp / zero-entry)?</label><div class="tri" data-tri="water_access"></div></div>
+          <div class="field" data-only="playground splash_pad"><label for="p-surface">Surface type</label>
+            <select id="p-surface"><option value="">Not sure</option></select></div>
+        </div>
+        <h3 style="margin-top:1.2rem">Accessibility</h3>
+        <div class="form-grid" id="a11y-fields"></div>
+        <div class="field full"><label for="p-a11y-notes">Accessibility notes</label>
+          <textarea id="p-a11y-notes" rows="2" maxlength="2000" placeholder="e.g. paved path from the parking lot; quiet corner away from the road"></textarea></div>
+      </section>
+
+      <!-- Step 3: playground equipment (skipped for splash pads & beaches) -->
+      <section class="step-panel" data-step="3" hidden>
+        <h2 id="step3-title">What's there to play on?</h2>
+        <div id="equip-wrap">
+          <div id="equipment-list"></div>
+          <button type="button" class="btn btn-secondary btn-sm" id="add-equip"><span class="ms" aria-hidden="true">add</span> Add equipment</button>
+        </div>
+        <div id="equip-skip" class="notice info hidden">Equipment lists apply to playgrounds — nothing needed here for this type. Continue to photos!</div>
+      </section>
+
+      <!-- Step 4: photos + description + review -->
+      <section class="step-panel" data-step="4" hidden>
+        <h2>Show the magic</h2>
+        <p style="color:var(--ink-soft)">Photos help other families see the equipment, surfacing, and layout.</p>
+        <div class="dropzone" id="dropzone" role="button" tabindex="0" aria-label="Upload photos">
+          <span class="ms" aria-hidden="true">add_a_photo</span>
+          <p style="margin:0.4rem 0 0"><b>Click to upload</b> or drag and drop<br><small id="photo-hint">JPG or PNG</small></p>
+          <input id="p-photos" type="file" accept="image/*" multiple class="hidden">
+        </div>
+        <div class="previews" id="previews"></div>
+
+        <div class="form-grid" style="margin-top:1rem">
+          <div class="field full"><label for="p-notes">Description</label>
+            <textarea id="p-notes" rows="3" maxlength="2000" placeholder="What makes this place special? Anything families should know?"></textarea></div>
+          <div class="field full"><label for="p-review">Your review (optional)</label>
+            <textarea id="p-review" rows="2" maxlength="2000" placeholder="How was your visit?"></textarea></div>
+          <div class="field"><label for="p-submitter">Your first name (optional)</label>
+            <input id="p-submitter" type="text" maxlength="120"></div>
+        </div>
+        <div class="hp" aria-hidden="true">
+          <label>Website <input id="p-website" type="text" tabindex="-1" autocomplete="off"></label>
+        </div>
+
+        <div class="card" style="background:var(--paper-dim);box-shadow:none;margin-top:1rem">
+          <h3>Review your report</h3>
+          <dl class="review-list" id="review-list"></dl>
+        </div>
+      </section>
+    </div>
+
+    <div class="wizard-foot">
+      <button type="button" class="btn btn-ghost" id="btn-back" disabled><span class="ms" aria-hidden="true">arrow_back</span> Back</button>
+      <button type="button" class="btn btn-primary" id="btn-next">Next <span class="ms" aria-hidden="true">arrow_forward</span></button>
+      <button type="submit" class="btn btn-primary hidden" id="btn-submit"><span class="ms" aria-hidden="true">send</span> Submit report</button>
+    </div>
+  </form>
+
+  <div class="categories" style="padding:1.5rem 0">
+    <div class="cat-card"><span class="ms" aria-hidden="true">verified_user</span><h3>Community Verified</h3>
+      <p>Every submission is reviewed by a moderator to ensure accuracy and safety before it appears on the map.</p></div>
+    <div class="cat-card"><span class="ms" aria-hidden="true">favorite</span><h3>Impactful Contribution</h3>
+      <p>Adding a single place can help dozens of local families discover their new favourite weekend spot.</p></div>
+  </div>
+
+  <section id="done" class="card hidden" aria-live="polite">
+    <h2>Thanks — report received! 🎉</h2>
+    <p id="done-msg"></p>
+    <p><a class="btn btn-primary" href="/#explore">Back to the map</a>
+       <a class="btn btn-secondary" href="/submit.html">Add another place</a></p>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div><a class="brand" href="/">Kindred Play</a><br><small>© 2026 Kindred Play.</small></div>
+  <div><a href="/about.html">About</a></div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"
+        integrity="sha512-BwHfrr4c9kmRkLw6iXFdzcdWV/PGkVgiIyIWLLlTSXzWQzxuSg4DiQUCpauz/EWjgk5TYQqX/kvn9pG1NpYfqg==" crossorigin="anonymous"></script>
+<script src="/js/common.js"></script>
+<script src="/js/submit.js"></script>
+</body>
+</html>

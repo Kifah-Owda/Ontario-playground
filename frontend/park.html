@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Location details — Kindred Play</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Be+Vietnam+Pro:wght@400;600;700&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400,0,0&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"
+      integrity="sha512-h9FcoyWjHcOcmEVkxOfTLnmZFWIH0iZhZT1H2TbOq55xssQGEJHEaIm+PgoUaZbRvQTNTluNOEfb1ZRy6D3BOw==" crossorigin="anonymous">
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="brand" href="/">Kindred Play</a>
+  <nav class="site-nav" aria-label="Main">
+    <a href="/#explore">Find a Park</a>
+    <a href="/about.html">About</a>
+    <a href="/admin.html">Admin</a>
+    <a class="btn btn-primary btn-sm" href="/submit.html"><span class="ms" aria-hidden="true">add_location</span> Add a Park</a>
+  </nav>
+</header>
+
+<div class="wizard-wrap" style="max-width:1200px;padding-bottom:0">
+  <p style="margin:0.4rem 0"><a href="/#explore">Explore</a> › <span id="crumb">Location</span></p>
+</div>
+
+<main class="detail-wrap" id="detail" aria-live="polite">
+  <p class="notice info">Loading location…</p>
+</main>
+
+<footer class="site-footer">
+  <div><a class="brand" href="/">Kindred Play</a><br><small>Empowering families to find joy and safety in every outdoor adventure.</small></div>
+  <div><a href="/about.html">About</a> · <a href="/submit.html">Add a Park</a></div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"
+        integrity="sha512-BwHfrr4c9kmRkLw6iXFdzcdWV/PGkVgiIyIWLLlTSXzWQzxuSg4DiQUCpauz/EWjgk5TYQqX/kvn9pG1NpYfqg==" crossorigin="anonymous"></script>
+<script src="/js/common.js"></script>
+<script src="/js/park.js"></script>
+</body>
+</html>

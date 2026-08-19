@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Moderation — Kindred Play</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Be+Vietnam+Pro:wght@400;600;700&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400,0,0&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="brand" href="/">Kindred Play</a>
+  <nav class="site-nav" aria-label="Main">
+    <a href="/#explore">Find a Park</a>
+    <a href="/about.html">About</a>
+    <a href="/admin.html" aria-current="page">Admin</a>
+    <button class="btn btn-ghost btn-sm hidden" id="signout-btn">Sign out</button>
+  </nav>
+</header>
+
+<main class="admin-wrap">
+  <!-- Login -->
+  <section id="login-view" class="card" style="max-width:420px;margin:3rem auto">
+    <h1 style="font-size:1.5rem"><span class="ms" aria-hidden="true">shield_person</span> Moderator sign-in</h1>
+    <p style="color:var(--ink-soft);font-size:0.92rem">One shared moderator password — set as <code>ADMIN_PASSWORD</code> on the server. No public accounts exist.</p>
+    <p id="login-error" class="notice err hidden" role="alert"></p>
+    <form id="login-form">
+      <div class="field"><label for="admin-pass">Password</label>
+        <input id="admin-pass" type="password" autocomplete="current-password" required></div>
+      <p><button class="btn btn-primary" style="width:100%" type="submit">Sign in</button></p>
+    </form>
+  </section>
+
+  <!-- Queue -->
+  <section id="queue-view" class="hidden">
+    <h1>Moderation</h1>
+    <div class="kpis" id="admin-stats" style="grid-template-columns:repeat(5,1fr);max-width:640px" aria-live="polite"></div>
+    <div class="tabs" role="tablist" aria-label="Queue status">
+      <button class="chip" data-status="pending" aria-pressed="true">Pending</button>
+      <button class="chip" data-status="approved" aria-pressed="false">Approved</button>
+      <button class="chip" data-status="rejected" aria-pressed="false">Rejected</button>
+      <button class="chip" data-status="archived" aria-pressed="false">Archived</button>
+      <a class="chip" href="#" id="export-link" style="text-decoration:none"><span class="ms" aria-hidden="true">download</span> Export CSV</a>
+    </div>
+    <p id="queue-error" class="notice err hidden" role="alert"></p>
+    <div id="queue"></div>
+  </section>
+
+  <!-- Edit dialog -->
+  <dialog class="editor" id="editor">
+    <h2 style="margin-top:0">Edit location <span id="ed-id" class="mini-chip"></span></h2>
+    <p style="color:var(--muted);font-size:0.85rem;margin-top:-0.4rem">In-place correction: status, history, and photos are untouched. Community updates should still come through the public form.</p>
+    <p id="ed-error" class="notice err hidden" role="alert"></p>
+    <form id="ed-form" method="dialog">
+      <div class="form-grid">
+        <div class="field"><label for="ed-name">Name *</label><input id="ed-name" type="text" required maxlength="200"></div>
+        <div class="field"><label for="ed-type">Type</label><select id="ed-type"></select></div>
+        <div class="field"><label for="ed-city">City</label><input id="ed-city" type="text" maxlength="120"></div>
+        <div class="field"><label for="ed-address">Address</label><input id="ed-address" type="text" maxlength="255"></div>
+        <div class="field"><label for="ed-lat">Latitude *</label><input id="ed-lat" type="number" step="any" required></div>
+        <div class="field"><label for="ed-lng">Longitude *</label><input id="ed-lng" type="number" step="any" required></div>
+        <div class="field"><label for="ed-surface">Surface</label><select id="ed-surface"><option value="">—</option></select></div>
+        <div class="field"><label for="ed-water">Water fountains</label><input id="ed-water" type="number" min="0" max="50"></div>
+        <div class="field"><label>Washroom</label><div class="tri" data-ed="washroom_nearby"></div></div>
+        <div class="field"><label>Parking</label><div class="tri" data-ed="parking"></div></div>
+        <div class="field"><label>Shade</label><div class="tri" data-ed="shade"></div></div>
+        <div class="field"><label>Fenced</label><div class="tri" data-ed="fenced"></div></div>
+        <div class="field"><label>Accessible water entry</label><div class="tri" data-ed="water_access"></div></div>
+        <div class="field full"><label for="ed-notes">Description</label><textarea id="ed-notes" rows="2" maxlength="2000"></textarea></div>
+        <div class="field full"><label for="ed-review">Review quote</label><textarea id="ed-review" rows="2" maxlength="2000"></textarea></div>
+      </div>
+      <h3 style="margin-top:1rem">Accessibility</h3>
+      <div class="form-grid" id="ed-a11y"></div>
+      <div class="field full" style="margin-top:0.6rem"><label for="ed-a11y-notes">Accessibility notes</label>
+        <textarea id="ed-a11y-notes" rows="2" maxlength="2000"></textarea></div>
+      <h3 style="margin-top:1rem">Equipment <small style="font-weight:400;color:var(--muted)">(playgrounds only)</small></h3>
+      <div id="ed-equipment"></div>
+      <button type="button" class="btn btn-secondary btn-sm" id="ed-add-equip"><span class="ms" aria-hidden="true">add</span> Add equipment</button>
+      <div style="display:flex;justify-content:flex-end;gap:0.6rem;margin-top:1.2rem">
+        <button type="button" class="btn btn-ghost" id="ed-cancel">Cancel</button>
+        <button type="submit" class="btn btn-primary" id="ed-save">Save changes</button>
+      </div>
+    </form>
+  </dialog>
+</main>
+
+<footer class="site-footer">
+  <div><a class="brand" href="/">Kindred Play</a></div>
+  <div><a href="/#explore">Back to the map</a></div>
+</footer>
+
+<script src="/js/common.js"></script>
+<script src="/js/admin.js"></script>
+</body>
+</html>

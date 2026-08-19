@@ -1,0 +1,26 @@
+# Render.com Blueprint — Kindred Play (Ontario Playground & Recreation Finder)
+# Deploy: push this repo to GitHub → Render Dashboard → New → Blueprint →
+# pick the repo. Render reads this file and provisions everything below.
+# See DEPLOYMENT.md for the full step-by-step (including seeding).
+
+services:
+  - type: web
+    name: kindred-play
+    runtime: python
+    plan: starter            # has a persistent disk; see DEPLOYMENT.md for the free-tier variant
+    buildCommand: pip install -r requirements.txt
+    # --proxy-headers is REQUIRED behind Render's proxy or the anti-spam
+    # limiter sees every visitor as one IP (see MANUAL_SETUP.md § Hosting).
+    startCommand: uvicorn backend.app.main:app --host 0.0.0.0 --port $PORT --proxy-headers --forwarded-allow-ips='*'
+    healthCheckPath: /api/meta
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true          # Render generates a strong random value
+      - key: ADMIN_PASSWORD
+        sync: false                  # you type this in the dashboard (never in git)
+      - key: PYTHON_VERSION
+        value: "3.12"
+    disk:
+      name: kindred-data
+      mountPath: /opt/render/project/src/data   # SQLite DB + uploaded photos
+      sizeGB: 1

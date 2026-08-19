@@ -1,0 +1,16 @@
+# Optional: local PostgreSQL for production-like runs.
+# The app runs on SQLite with no containers at all; use this only if you want
+# Postgres. `docker compose up -d db`, then set DATABASE_URL accordingly.
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: playgrounds
+      POSTGRES_USER: playgrounds
+      POSTGRES_PASSWORD: change-me   # match your .env DATABASE_URL
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+volumes:
+  pgdata:
