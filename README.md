@@ -19,6 +19,7 @@ Built to the Phase 1 documentation package (`project_analysis/`) plus the owner-
 No accounts, keys, or paid services are required to run it. Optional external services are documented in **MANUAL_SETUP.md**.
 
 ## Quickstart (local, ~2 minutes)
+**macOS / Linux**
 ```bash
 cd playground-ontario
 python3 -m venv .venv && . .venv/bin/activate
@@ -28,6 +29,25 @@ python -m backend.app.seed      # 10 playgrounds / 41 items + 3 sample splash pa
 uvicorn backend.app.main:app --reload
 ```
 Or just: `./run_dev.sh`
+
+**Windows (PowerShell)**
+```powershell
+cd playground-ontario
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+copy .env.example .env          # then EDIT .env: set SECRET_KEY and ADMIN_PASSWORD
+python -m backend.app.seed
+uvicorn backend.app.main:app --reload
+```
+Or just: `.\run_dev.ps1`
+
+> `run_dev.sh` is POSIX-only — it calls `python3` and sources `.venv/bin/activate`,
+> neither of which exists on Windows (venvs there use `.venv\Scripts\`). PowerShell
+> won't execute a `.sh` file at all, so it appears to do nothing. Use `run_dev.ps1`.
+
+## run the code 
+.\.venv\Scripts\python.exe -m uvicorn backend.app.main:app --reload --port 8000
 
 Then open:
 - **http://localhost:8000/** — landing (hero + category cards) + explore dashboard

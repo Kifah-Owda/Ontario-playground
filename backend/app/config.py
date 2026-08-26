@@ -62,6 +62,15 @@ class Settings:
     IMAGE_THUMB_DIMENSION: int = int(_env("IMAGE_THUMB_DIMENSION", "480"))
     IMAGE_QUALITY: int = int(_env("IMAGE_QUALITY", "80"))  # WebP quality
 
+    # --- Remote photo storage (Supabase Storage) --------------------------
+    # Unset locally: photos are written to UPLOAD_DIR and served from
+    # /uploads, exactly as before. Set in production: photos live in a public
+    # Supabase bucket and the DB stores the object key in the same
+    # filename/thumb_filename columns, so no migration is involved.
+    SUPABASE_URL: str = _env("SUPABASE_URL", "").rstrip("/")
+    SUPABASE_SERVICE_KEY: str = _env("SUPABASE_SERVICE_KEY", "")
+    SUPABASE_BUCKET: str = _env("SUPABASE_BUCKET", "park-photos")
+
     # --- Anti-abuse -----------------------------------------------------------
     SUBMISSIONS_PER_HOUR_PER_IP: int = int(_env("SUBMISSIONS_PER_HOUR_PER_IP", "10"))
 
@@ -88,7 +97,29 @@ class Settings:
 
 
 settings = Settings()
-settings.UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+
+# Remote storage is on only when BOTH halves of the credential are present —
+# a half-configured environment falls back to local disk rather than failing
+# every upload at runtime.
+USE_REMOTE_STORAGE: bool = bool(
+    settings.SUPABASE_URL and settings.SUPABASE_SERVICE_KEY
+)
+
+
+def storage_object_url(key: str) -> str:
+    """Public URL for a stored photo, in whichever mode is active."""
+    if USE_REMOTE_STORAGE:
+        return (
+            f"{settings.SUPABASE_URL}/storage/v1/object/public/"
+            f"{settings.SUPABASE_BUCKET}/{key}"
+        )
+    return f"/uploads/{key}"
+
+
+# Only needed when photos live on this machine; in remote mode there is no
+# upload directory to create (and on Render nothing writable to create it in).
+if not USE_REMOTE_STORAGE:
+    settings.UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 # Loud, non-fatal warnings for the two values everything else depends on.
 if settings.SECRET_KEY == "dev-only-change-me":

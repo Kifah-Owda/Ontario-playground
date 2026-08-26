@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session, selectinload
 
-from ..config import settings
+from ..config import settings, storage_object_url
 from ..database import get_db
 from ..models import (AGE_GROUPS, CONDITIONS, EQUIPMENT_TYPES, LOCATION_TYPES,
                       SURFACES, EquipmentItem, Park)
@@ -41,8 +41,8 @@ def _park_out(p: Park) -> ParkOut:
         equipment=[e for e in p.equipment],  # via from_attributes on EquipmentOut
         photos=[
             PhotoOut(
-                url=f"/uploads/{ph.filename}",
-                thumb_url=f"/uploads/{ph.thumb_filename}",
+                url=storage_object_url(ph.filename),
+                thumb_url=storage_object_url(ph.thumb_filename),
                 width=ph.width,
                 height=ph.height,
             )

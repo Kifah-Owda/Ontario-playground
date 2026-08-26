@@ -9,6 +9,7 @@ import json
 
 from fastapi import (APIRouter, Depends, File, Form, HTTPException, Request,
                      UploadFile)
+from fastapi.concurrency import run_in_threadpool
 from pydantic import ValidationError
 from sqlalchemy.orm import Session
 
@@ -94,7 +95,12 @@ async def create_submission(
         if not raw:
             continue
         try:
-            saved_files.append(process_upload(raw, up.filename))
+            # process_upload is blocking (Pillow, then an upload to Supabase);
+            # running it inline would stall the event loop for every other
+            # request until all photos in this submission finished.
+            saved_files.append(
+                await run_in_threadpool(process_upload, raw, up.filename)
+            )
         except ImageError as exc:
             raise HTTPException(400, f"{up.filename}: {exc}")
     for meta in saved_files:

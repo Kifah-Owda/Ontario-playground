@@ -12,15 +12,41 @@ from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
 from .config import settings
 
-connect_args = {}
-if settings.DATABASE_URL.startswith("sqlite"):
-    connect_args = {"check_same_thread": False}
+def _normalise_url(url: str) -> str:
+    """Make a pasted Postgres URL usable as-is.
 
-engine = create_engine(settings.DATABASE_URL, connect_args=connect_args, future=True)
+    Supabase (and most hosts) hand out `postgresql://...`, which SQLAlchemy
+    resolves to psycopg2 — a driver we do not install. Rewrite it to name
+    psycopg 3 explicitly rather than relying on the operator pasting the right
+    prefix into a dashboard field. Also require TLS, which Supabase expects.
+    """
+    if url.startswith("postgres://"):  # legacy Heroku-style prefix
+        url = "postgresql://" + url[len("postgres://") :]
+    if url.startswith("postgresql://"):
+        url = "postgresql+psycopg://" + url[len("postgresql://") :]
+    if url.startswith("postgresql+psycopg://") and "sslmode=" not in url:
+        url += ("&" if "?" in url else "?") + "sslmode=require"
+    return url
+
+
+DATABASE_URL = _normalise_url(settings.DATABASE_URL)
+IS_SQLITE = DATABASE_URL.startswith("sqlite")
+
+connect_args = {"check_same_thread": False} if IS_SQLITE else {}
+engine_kwargs: dict = {}
+if not IS_SQLITE:
+    # Supabase's pooler drops idle connections. Without pre-ping, the first
+    # request after a quiet spell gets a dead connection and 500s; recycling
+    # keeps us from holding one long enough to be culled mid-use.
+    engine_kwargs = {"pool_pre_ping": True, "pool_recycle": 300}
+
+engine = create_engine(
+    DATABASE_URL, connect_args=connect_args, future=True, **engine_kwargs
+)
 
 # SQLite ships with foreign-key enforcement OFF per connection; enable it so
 # integrity bugs surface in development exactly as they would on PostgreSQL.
-if settings.DATABASE_URL.startswith("sqlite"):
+if IS_SQLITE:
 
     @event.listens_for(engine, "connect")
     def _sqlite_fk_on(dbapi_conn, _record):  # pragma: no cover

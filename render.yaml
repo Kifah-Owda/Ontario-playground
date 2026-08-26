@@ -1,26 +1,37 @@
-# Render.com Blueprint — Kindred Play (Ontario Playground & Recreation Finder)
-# Deploy: push this repo to GitHub → Render Dashboard → New → Blueprint →
-# pick the repo. Render reads this file and provisions everything below.
-# See DEPLOYMENT.md for the full step-by-step (including seeding).
+# Render.com service reference — Kindred Play (Ontario Playground Finder)
+#
+# NOTE: Blueprints are a PAID Render feature, so this file is no longer consumed
+# automatically. It is kept as the authoritative record of the settings to type
+# into the dashboard by hand (New → Web Service). Creating the service manually
+# is free and produces exactly the same result — a Blueprint only fills the form
+# in for you. See DEPLOYMENT.md for the click-by-click walkthrough.
+#
+# There is deliberately NO disk: block. The free tier has no persistent disk, so
+# state lives in Supabase instead (Postgres for data, Storage for photos).
 
 services:
   - type: web
     name: kindred-play
     runtime: python
-    plan: starter            # has a persistent disk; see DEPLOYMENT.md for the free-tier variant
+    plan: free
     buildCommand: pip install -r requirements.txt
-    # --proxy-headers is REQUIRED behind Render's proxy or the anti-spam
-    # limiter sees every visitor as one IP (see MANUAL_SETUP.md § Hosting).
+    # --proxy-headers is REQUIRED behind Render's proxy, or the anti-spam
+    # limiter in security.py sees every visitor as the same IP.
     startCommand: uvicorn backend.app.main:app --host 0.0.0.0 --port $PORT --proxy-headers --forwarded-allow-ips='*'
+    # /api/meta touches no database, so a health check never wakes Supabase.
     healthCheckPath: /api/meta
     envVars:
+      - key: DATABASE_URL
+        sync: false            # Supabase SESSION POOLER string (not direct — IPv6)
+      - key: SUPABASE_URL
+        sync: false            # https://<project-ref>.supabase.co
+      - key: SUPABASE_SERVICE_KEY
+        sync: false            # service_role key — secret, dashboard only
+      - key: SUPABASE_BUCKET
+        value: park-photos
       - key: SECRET_KEY
-        generateValue: true          # Render generates a strong random value
+        generateValue: true    # Render generates a strong random value
       - key: ADMIN_PASSWORD
-        sync: false                  # you type this in the dashboard (never in git)
+        sync: false            # you type this in the dashboard (never in git)
       - key: PYTHON_VERSION
         value: "3.12"
-    disk:
-      name: kindred-data
-      mountPath: /opt/render/project/src/data   # SQLite DB + uploaded photos
-      sizeGB: 1
