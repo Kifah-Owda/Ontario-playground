@@ -1,11 +1,19 @@
 # TESTING CHECKLIST — Kindred Play (Stitch redesign release)
 
-Run top-to-bottom on a fresh local install (`./run_dev.sh` after seeding), then
-repeat the ★ items once on the deployed URL. Sandbox note: automated checks
+Run top-to-bottom on a fresh local install (`.\run_dev.ps1` on Windows,
+`./run_dev.sh` on macOS/Linux), then repeat the ★ items once on the deployed URL. Sandbox note: automated checks
 already passed (all Python compiles, all JS passes syntax checks, diff-summary
 unit tests green); everything below is the runtime pass that needs a browser.
 
 ## 1. Setup & seed
+
+> **Two storage modes.** With no Supabase variables in `.env`, the app uses
+> SQLite at `data/app.db` and writes photos to `data/uploads/`. Setting both
+> `SUPABASE_URL` and `SUPABASE_SERVICE_KEY` switches photos to Supabase
+> Storage; `DATABASE_URL` switches the database. Run this checklist in
+> whichever mode you are about to ship, and note that in Supabase mode the
+> `data/` directory is not used at all.
+
 - [ ] `pip install -r requirements.txt` completes
 - [ ] Delete any old `data/app.db` (schema changed) → `python -m backend.app.seed`
       prints `Seeded 10 playgrounds / 41 equipment items + 3 sample splash pads & beaches.`
