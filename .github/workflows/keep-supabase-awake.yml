@@ -1,0 +1,52 @@
+# Supabase pauses free projects after ~7 days with no database activity. When
+# that happens the site is down until someone resumes it by hand, so this
+# workflow makes a real query on a schedule.
+#
+# Twice weekly, Monday and Thursday: gaps of 3 and 4 days, so a single missed
+# or delayed run still cannot reach the 7-day threshold.
+name: Keep Supabase awake
+
+on:
+  schedule:
+    - cron: "0 12 * * 1,4"
+  workflow_dispatch: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Query /api/parks
+        run: |
+          set -euo pipefail
+          URL="https://ontario-playground.onrender.com/api/parks"
+
+          # It must be /api/parks, not /api/meta: /api/meta returns constants
+          # without touching the database, so it would wake Render but let
+          # Supabase pause anyway — the exact failure this job prevents.
+          #
+          # Render free spins down after ~15 min idle, so the first request
+          # pays a ~50s cold start. Allow for it and retry instead of failing.
+          code=$(curl -sS -o body.json -w '%{http_code}' \
+                   --max-time 150 --retry 3 --retry-delay 25 --retry-all-errors "$URL")
+          echo "HTTP status: $code"
+          if [ "$code" != "200" ]; then
+            echo "::error::Expected HTTP 200, got $code"
+            head -c 500 body.json || true
+            exit 1
+          fi
+
+          # A 200 is not sufficient proof. If the response were empty or an
+          # error page, the database would never have been queried and
+          # Supabase could still pause with the job showing green.
+          # Require a non-empty ARRAY specifically. `jq length` on an object
+          # returns its key count, so a plain length check would happily pass
+          # on /api/meta (8 keys) — an endpoint that never touches the
+          # database and would let Supabase pause with this job showing green.
+          count=$(jq 'if type == "array" then length else -1 end' body.json)
+          echo "parks returned: $count"
+          if [ "$count" -lt 1 ]; then
+            echo "::error::Expected a non-empty array of parks, got $count (-1 means the response was not an array)"
+            head -c 300 body.json || true
+            exit 1
+          fi
+          echo "OK — Supabase was queried and returned $count parks."
