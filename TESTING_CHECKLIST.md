@@ -1,4 +1,4 @@
-# TESTING CHECKLIST — Kindred Play (Stitch redesign release)
+# TESTING CHECKLIST — Ontario Playground (Stitch redesign release)
 
 Run top-to-bottom on a fresh local install (`.\run_dev.ps1` on Windows,
 `./run_dev.sh` on macOS/Linux), then repeat the ★ items once on the deployed URL. Sandbox note: automated checks

@@ -14,7 +14,7 @@ async function init() {
   const id = new URLSearchParams(location.search).get("id");
   if (!id) throw new Error("404 no id");
   const [meta, p] = await Promise.all([API.get("/api/meta"), API.get(`/api/parks/${id}`)]);
-  document.title = `${p.name} — Kindred Play`;
+  document.title = `${p.name} — Ontario Playground`;
   document.getElementById("crumb").textContent = p.name;
   renderDetail(p, meta);
 }

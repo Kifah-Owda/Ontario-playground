@@ -1,6 +1,6 @@
-# SUMMARY OF CHANGES — Kindred Play integration (2026 redesign release)
+# SUMMARY OF CHANGES — Ontario Playground integration (2026 redesign release)
 
-Scope: full-stack integration of the approved Stitch "Kindred Play" UX/UI into
+Scope: full-stack integration of the approved Stitch "Ontario Playground" UX/UI into
 the Phase 3-stabilized application, evolving it from a playground-only tool to
 a three-type recreation-location platform. Architecture preserved: one FastAPI
 process, SQLite/Postgres via SQLAlchemy, no-build static frontend, no accounts.
@@ -28,8 +28,8 @@ remains playground-only (enforced). Migration: delete `data/app.db` + re-seed
 - **seed.py** — 10 verified playgrounds unchanged; adds 3 clearly-marked sample
   splash pads/beaches (zero equipment, so the validated 41-item totals hold).
 
-## Frontend (rewritten to the Kindred Play system)
-- **css/style.css** — full token translation of kindred_play/DESIGN.md: cream
+## Frontend (rewritten to the Ontario Playground system)
+- **css/style.css** — full token translation of ontario_playground/DESIGN.md: cream
   surfaces, Forest Deep/Sage/Mint, Plus Jakarta Sans + Be Vietnam Pro,
   Material Symbols, 16/24px radii, pill buttons, tonal shadows, 48px touch
   targets, focus-visible rings, reduced-motion support, 900px responsive
@@ -54,7 +54,7 @@ remains playground-only (enforced). Migration: delete `data/app.db` + re-seed
   GPS/tap/drag/manual entry kept; dropzone photo upload with previews;
   review-before-submit; honeypot + duplicate-name hint kept; **I1 update
   pre-fill fully preserved** and extended to the new fields.
-- **admin.html + js/admin.js** — Kindred Play restyle; live counts dashboard
+- **admin.html + js/admin.js** — Ontario Playground restyle; live counts dashboard
   (Pending/Live/Rejected/Archived/Photos); tabs; approve/reject with note;
   **new Edit dialog** for every record wired to the PUT endpoint (type-aware
   equipment section, tri-state pills, validation feedback); delete + CSV kept;
@@ -64,7 +64,7 @@ remains playground-only (enforced). Migration: delete `data/app.db` + re-seed
 
 ## Docs, config, deliverables
 - **docs/API.md** — rewritten for the new model, filters, and edit endpoint.
-- **README.md** — Kindred Play naming, new pages, schema-migration note,
+- **README.md** — Ontario Playground naming, new pages, schema-migration note,
   design-system note, updated parity table and seed output.
 - **render.yaml (new)** — Render blueprint: build/start commands (with the I4
   proxy flags), auto-generated SECRET_KEY, dashboard-entered ADMIN_PASSWORD,

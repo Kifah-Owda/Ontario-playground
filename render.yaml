@@ -1,4 +1,4 @@
-# Render.com service reference — Kindred Play (Ontario Playground Finder)
+# Render.com service reference — Ontario Playground (Ontario Playground Finder)
 #
 # NOTE: Blueprints are a PAID Render feature, so this file is no longer consumed
 # automatically. It is kept as the authoritative record of the settings to type
@@ -11,7 +11,7 @@
 
 services:
   - type: web
-    name: kindred-play
+    name: ontario-playground
     runtime: python
     plan: free
     buildCommand: pip install -r requirements.txt

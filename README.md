@@ -1,6 +1,6 @@
-# Kindred Play — Ontario Playground & Recreation Finder
+# Ontario Playground — Ontario Playground & Recreation Finder
 
-Open-source rebuild of the ArcGIS playground MVP ("Find the Perfect Playground: A Guide to Ontario's Play Areas"), redesigned with the **Kindred Play** design system (2026). Communities report **playgrounds, splash pads, and beaches** — amenities, disability accessibility, photos, and (for playgrounds) every piece of play equipment with its age group and condition — moderators approve reports, and families explore them through a friendly landing page, a filterable map dashboard, and rich location detail pages.
+Open-source rebuild of the ArcGIS playground MVP ("Find the Perfect Playground: A Guide to Ontario's Play Areas"), redesigned with the **Ontario Playground** design system (2026). Communities report **playgrounds, splash pads, and beaches** — amenities, disability accessibility, photos, and (for playgrounds) every piece of play equipment with its age group and condition — moderators approve reports, and families explore them through a friendly landing page, a filterable map dashboard, and rich location detail pages.
 
 Built to the Phase 1 documentation package (`project_analysis/`) plus the owner-approved Phase 2 changes: **park-centric submissions**, **moderation-before-publish**, **accessibility attributes**, **automatic image resizing**, and a **free/open-source stack**.
 
@@ -77,7 +77,7 @@ backend/app/          FastAPI application
   seed.py             reconstructed MVP dataset (verified totals)
   routes/             public.py · submissions.py · admin.py
 frontend/             no-build static app (index, park, submit, about, admin)
-frontend/css/style.css  Kindred Play design tokens (hand-written; no Tailwind runtime)
+frontend/css/style.css  Ontario Playground design tokens (hand-written; no Tailwind runtime)
 data/                 SQLite DB + processed uploads (gitignored)
 docs/                 ARCHITECTURE.md · API.md
 MANUAL_SETUP.md       every external value you must supply + final checklist
@@ -102,7 +102,7 @@ project_analysis/     Phase 1 reverse-engineering package
 ## Operating notes
 - **Moderation:** every submission is `pending` until approved. Approving an update archives the park's previous snapshot, preserving history; the update form pre-fills the park's current public data, and moderation cards show a change summary (with removals highlighted) for revisions. Permanently deleting a record also removes its photo files from disk; rejected/archived records keep theirs as history.
 - **Seed data caveat:** DownsView Park and Edithvale Park breakdowns match the dashboard screenshots exactly; the other eight parks are plausible reconstructions that reproduce the validated global totals (41 items; 21/14/6 conditions). Coordinates are approximate — correct them via an update submission or by editing `seed.py`.
-- **Design system:** the frontend implements the approved Stitch "Kindred Play" tokens (cream surfaces, Forest Deep primary, Plus Jakarta Sans + Be Vietnam Pro, Material Symbols icons, pill buttons, 16/24px radii) as hand-written CSS — deliberately **no Tailwind runtime** (the Play CDN is not for production and would break the no-build architecture). Age groups keep their ●◆▲ shapes with the new approved colours (Toddler Blue / Preschool Purple / School-age Orange), so meaning never relies on colour alone.
+- **Design system:** the frontend implements the approved Stitch "Ontario Playground" tokens (cream surfaces, Forest Deep primary, Plus Jakarta Sans + Be Vietnam Pro, Material Symbols icons, pill buttons, 16/24px radii) as hand-written CSS — deliberately **no Tailwind runtime** (the Play CDN is not for production and would break the no-build architecture). Age groups keep their ●◆▲ shapes with the new approved colours (Toddler Blue / Preschool Purple / School-age Orange), so meaning never relies on colour alone.
 - **Sample data:** the three seeded splash pads/beaches are clearly-marked plausible samples so those categories aren't empty — verify and correct them via admin **Edit**.
 - **Scale:** client-side filtering is used because a full-province dataset (thousands of parks) is still a small payload; the `/api/parks?bbox=` and `/api/stats` endpoints already support server-side filtering when it's time to switch. See `docs/ARCHITECTURE.md`.
 

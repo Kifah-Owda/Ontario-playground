@@ -1,4 +1,4 @@
-# DEPLOYMENT — getting Kindred Play onto a public URL
+# DEPLOYMENT — getting Ontario Playground onto a public URL
 
 **Honest scope note:** an AI assistant can prepare everything *up to* the hosting
 account — config, run commands, environment, database steps — but cannot create
@@ -41,8 +41,8 @@ the form for you (`render.yaml` records the exact values).
 
 ### 2. Put the code on GitHub
 ```bash
-git add -A && git commit -m "Kindred Play"
-git remote add origin https://github.com/<you>/kindred-play.git
+git add -A && git commit -m "Ontario Playground"
+git remote add origin https://github.com/<you>/ontario-playground.git
 git push -u origin main
 ```
 Confirm `.env` is NOT in the repo — `git ls-files .env` must print nothing.

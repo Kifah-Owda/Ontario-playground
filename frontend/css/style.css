@@ -1,6 +1,6 @@
 /* =========================================================================
-   Kindred Play design system (Stitch redesign, 2026)
-   Tokens from kindred_play/DESIGN.md — translated to hand-written CSS
+   Ontario Playground design system (Stitch redesign, 2026)
+   Tokens from ontario_playground/DESIGN.md — translated to hand-written CSS
    (no Tailwind runtime: architecture decision D5, no build step).
    ========================================================================= */
 :root {
@@ -151,7 +151,9 @@ img { max-width: 100%; display: block; }
   display: inline-flex; align-items: center; gap: 0.4rem;
 }
 .chip[aria-pressed="true"] { background: var(--forest); border-color: var(--forest); color: #fff; }
-.chip .dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+/* flex-shrink:0 — the dot is an empty element, so its automatic minimum
+   size is 0 and a squeezed chip could otherwise collapse it. */
+.chip .dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; flex: 0 0 12px; }
 .chip.tog[aria-pressed="true"] { background: var(--secondary); border-color: var(--secondary); }
 .field label { display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 0.25rem; color: var(--ink-soft); }
 select, input[type="text"], input[type="number"], input[type="search"], textarea {
@@ -193,7 +195,7 @@ select:focus, input:focus, textarea:focus { border-width: 2px; border-color: var
 .mini-chip.a11y { background: rgba(74, 144, 226, 0.14); color: #1d5aa8; }
 
 /* Age shapes (kept: shape carries meaning, colour reinforces) */
-.shape { width: 13px; height: 13px; display: inline-block; }
+.shape { width: 13px; height: 13px; display: inline-block; flex: 0 0 auto; }
 .shape.circle { border-radius: 50%; background: var(--age-toddler); }
 .shape.diamond { background: var(--age-preschool); transform: rotate(45deg); width: 11px; height: 11px; }
 .shape.triangle {
