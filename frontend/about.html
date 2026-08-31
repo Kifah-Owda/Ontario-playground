@@ -9,15 +9,25 @@
 <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-<header class="site-header">
-  <a class="brand" href="/">Ontario Playground</a>
-  <nav class="site-nav" aria-label="Main">
-    <a href="/#explore">Find a Park</a>
-    <a href="/about.html" aria-current="page">About</a>
-    <a href="/admin.html">Admin</a>
-    <a class="btn btn-primary btn-sm" href="/submit.html"><span class="ms" aria-hidden="true">add_location</span> Add a Park</a>
-  </nav>
-</header>
+<nav class="hp-nav" aria-label="Main">
+  <div class="hp-nav-inner">
+    <a class="hp-brand" href="/">Ontario Playground</a>
+    <div class="hp-nav-links" id="site-nav">
+      <a href="/explore.html">Find a Park</a>
+      <!-- Phone-only: the header's action pill is hidden under 640px, so without
+           these there is no route to the form or the about page on a phone. -->
+      <a class="hp-nav-only-mobile" href="/submit.html">Add a Park</a>
+      <a class="hp-nav-only-mobile" href="/about.html">About us</a>
+    </div>
+    <div class="hp-nav-actions">
+      <a class="hp-nav-cta" href="/submit.html"><span class="ms" aria-hidden="true">add_location</span> Add a Park</a>
+      <button class="hp-nav-toggle" id="nav-toggle" type="button" aria-expanded="false"
+              aria-controls="site-nav" aria-label="Menu">
+        <span class="ms" aria-hidden="true">menu</span>
+      </button>
+    </div>
+  </div>
+</nav>
 
 <main class="prose">
   <h1>Plan your play day with confidence.</h1>
@@ -56,14 +66,50 @@
   </div>
 
   <div class="card">
-    <h2>Data &amp; privacy</h2>
-    <p>No accounts, no tracking. The only optional personal detail is a first name if you'd like credit for a report. Photos you submit are resized and published under the place they document. Moderators may edit or remove entries to keep information accurate and appropriate. The dataset is exportable by the moderation team for community planning and research.</p>
+    <h2 id="privacy">Data &amp; privacy</h2>
+    <p>We have deliberately built this site to collect as little as possible. There are
+       no accounts, no advertising, and no analytics or tracking scripts of any kind.
+       We do not sell or share anything you give us.</p>
+
+    <h3>What we store</h3>
+    <ul>
+      <li><b>A first name, only if you choose to give one</b> when reporting a place, so you
+          can be credited. Leave it blank and the report is anonymous.</li>
+      <li><b>The details of the place you report</b> — location, equipment, surfacing,
+          facilities. This is public information about public spaces, and it is the whole
+          point of the site.</li>
+      <li><b>Photos you upload.</b> These are resized and published alongside the place they
+          document.</li>
+    </ul>
+
+    <h3>About photos</h3>
+    <p>Location data and other hidden metadata are <b>stripped from every photo on upload</b> —
+       the GPS coordinates your phone embeds never reach our database. Please only submit
+       photos you have the right to share, and avoid close-up or identifying pictures of
+       children who are not your own. Moderators may edit or remove any submission to keep
+       the site accurate and appropriate.</p>
+
+    <h3>Other services your browser contacts</h3>
+    <p>Some parts of the site load from third parties, and those services can see your IP
+       address when they do. We do not control what they log:</p>
+    <ul>
+      <li><b>OpenStreetMap</b> — supplies the map tiles, so it is contacted whenever a map is shown.</li>
+      <li><b>Nominatim</b> (also OpenStreetMap) — turns a typed address into coordinates when
+          you search for a location on the report form.</li>
+      <li><b>Google Fonts</b> and the <b>unpkg</b> / <b>jsDelivr</b> code networks — deliver the
+          typefaces and mapping libraries the pages need.</li>
+    </ul>
+
+    <h3>Removing something</h3>
+    <p>If you want a photo, a name, or an entry taken down, ask us and we will remove it —
+       no reason needed. <!-- TODO: add the real contact address here. --></p>
   </div>
 </main>
 
 <footer class="site-footer">
   <div><a class="brand" href="/">Ontario Playground</a><br><small>Empowering families to find joy and safety in every outdoor adventure.</small></div>
-  <div><a href="/#explore">Find a Park</a> · <a href="/submit.html">Add a Park</a></div>
+  <div class="footer-links"><a href="/explore.html">Find a Park</a> · <a href="/about.html">About</a> · <a href="/submit.html">Add a Park</a> · <a href="/about.html#privacy">Privacy</a> · <a href="/api/docs">API</a> · <a class="footer-admin" href="/admin.html">Staff sign in</a></div>
 </footer>
+<script src="/js/common.js"></script>
 </body>
 </html>

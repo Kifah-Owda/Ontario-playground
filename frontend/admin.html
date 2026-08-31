@@ -10,15 +10,25 @@
 <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-<header class="site-header">
-  <a class="brand" href="/">Ontario Playground</a>
-  <nav class="site-nav" aria-label="Main">
-    <a href="/#explore">Find a Park</a>
-    <a href="/about.html">About</a>
-    <a href="/admin.html" aria-current="page">Admin</a>
-    <button class="btn btn-ghost btn-sm hidden" id="signout-btn">Sign out</button>
-  </nav>
-</header>
+<nav class="hp-nav" aria-label="Main">
+  <div class="hp-nav-inner">
+    <a class="hp-brand" href="/">Ontario Playground</a>
+    <div class="hp-nav-links" id="site-nav">
+      <a href="/explore.html">Find a Park</a>
+      <!-- Phone-only: the header's action pill is hidden under 640px, so without
+           these there is no route to the form or the about page on a phone. -->
+      <a class="hp-nav-only-mobile" href="/submit.html">Add a Park</a>
+      <a class="hp-nav-only-mobile" href="/about.html">About us</a>
+    </div>
+    <div class="hp-nav-actions">
+      <button class="hp-nav-cta hidden" id="signout-btn">Sign out</button>
+      <button class="hp-nav-toggle" id="nav-toggle" type="button" aria-expanded="false"
+              aria-controls="site-nav" aria-label="Menu">
+        <span class="ms" aria-hidden="true">menu</span>
+      </button>
+    </div>
+  </div>
+</nav>
 
 <main class="admin-wrap">
   <!-- Login -->
@@ -88,7 +98,7 @@
 
 <footer class="site-footer">
   <div><a class="brand" href="/">Ontario Playground</a></div>
-  <div><a href="/#explore">Back to the map</a></div>
+  <div><a href="/explore.html">Back to the map</a></div>
 </footer>
 
 <script src="/js/common.js"></script>

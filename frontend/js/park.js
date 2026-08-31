@@ -7,7 +7,7 @@ init().catch((e) => {
   document.getElementById("detail").innerHTML =
     `<div class="card"><h2>We couldn't find that location</h2>
      <p>${escapeHtml(e.message.includes("404") ? "It may have been updated or removed." : e.message)}</p>
-     <p><a class="btn btn-primary" href="/#explore">Back to the map</a></p></div>`;
+     <p><a class="btn btn-primary" href="/explore.html">Back to the map</a></p></div>`;
 });
 
 async function init() {

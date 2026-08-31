@@ -11,15 +11,25 @@
 <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-<header class="site-header">
-  <a class="brand" href="/">Ontario Playground</a>
-  <nav class="site-nav" aria-label="Main">
-    <a href="/#explore">Find a Park</a>
-    <a href="/about.html">About</a>
-    <a href="/admin.html">Admin</a>
-    <a class="btn btn-primary btn-sm" href="/submit.html" aria-current="page"><span class="ms" aria-hidden="true">add_location</span> Add a Park</a>
-  </nav>
-</header>
+<nav class="hp-nav" aria-label="Main">
+  <div class="hp-nav-inner">
+    <a class="hp-brand" href="/">Ontario Playground</a>
+    <div class="hp-nav-links" id="site-nav">
+      <a href="/explore.html">Find a Park</a>
+      <!-- Phone-only: the header's action pill is hidden under 640px, so without
+           these there is no route to the form or the about page on a phone. -->
+      <a class="hp-nav-only-mobile" href="/submit.html">Add a Park</a>
+      <a class="hp-nav-only-mobile" href="/about.html">About us</a>
+    </div>
+    <div class="hp-nav-actions">
+      <a class="hp-nav-cta" href="/submit.html"><span class="ms" aria-hidden="true">add_location</span> Add a Park</a>
+      <button class="hp-nav-toggle" id="nav-toggle" type="button" aria-expanded="false"
+              aria-controls="site-nav" aria-label="Menu">
+        <span class="ms" aria-hidden="true">menu</span>
+      </button>
+    </div>
+  </div>
+</nav>
 
 <main class="wizard-wrap">
   <div class="wizard-head">
@@ -145,24 +155,24 @@
     </div>
   </form>
 
-  <div class="categories" style="padding:1.5rem 0">
-    <div class="cat-card"><span class="ms" aria-hidden="true">verified_user</span><h3>Community Verified</h3>
+  <div class="trust-grid">
+    <div class="trust-card"><span class="ms" aria-hidden="true">verified_user</span><h3>Community Verified</h3>
       <p>Every submission is reviewed by a moderator to ensure accuracy and safety before it appears on the map.</p></div>
-    <div class="cat-card"><span class="ms" aria-hidden="true">favorite</span><h3>Impactful Contribution</h3>
+    <div class="trust-card"><span class="ms" aria-hidden="true">favorite</span><h3>Impactful Contribution</h3>
       <p>Adding a single place can help dozens of local families discover their new favourite weekend spot.</p></div>
   </div>
 
   <section id="done" class="card hidden" aria-live="polite">
     <h2>Thanks — report received! 🎉</h2>
     <p id="done-msg"></p>
-    <p><a class="btn btn-primary" href="/#explore">Back to the map</a>
+    <p><a class="btn btn-primary" href="/explore.html">Back to the map</a>
        <a class="btn btn-secondary" href="/submit.html">Add another place</a></p>
   </section>
 </main>
 
 <footer class="site-footer">
   <div><a class="brand" href="/">Ontario Playground</a><br><small>© 2026 Ontario Playground.</small></div>
-  <div><a href="/about.html">About</a></div>
+  <div class="footer-links"><a href="/explore.html">Find a Park</a> · <a href="/about.html">About</a> · <a href="/submit.html">Add a Park</a> · <a href="/about.html#privacy">Privacy</a> · <a href="/api/docs">API</a> · <a class="footer-admin" href="/admin.html">Staff sign in</a></div>
 </footer>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"

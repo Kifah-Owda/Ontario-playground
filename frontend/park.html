@@ -11,18 +11,28 @@
 <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-<header class="site-header">
-  <a class="brand" href="/">Ontario Playground</a>
-  <nav class="site-nav" aria-label="Main">
-    <a href="/#explore">Find a Park</a>
-    <a href="/about.html">About</a>
-    <a href="/admin.html">Admin</a>
-    <a class="btn btn-primary btn-sm" href="/submit.html"><span class="ms" aria-hidden="true">add_location</span> Add a Park</a>
-  </nav>
-</header>
+<nav class="hp-nav" aria-label="Main">
+  <div class="hp-nav-inner">
+    <a class="hp-brand" href="/">Ontario Playground</a>
+    <div class="hp-nav-links" id="site-nav">
+      <a href="/explore.html">Find a Park</a>
+      <!-- Phone-only: the header's action pill is hidden under 640px, so without
+           these there is no route to the form or the about page on a phone. -->
+      <a class="hp-nav-only-mobile" href="/submit.html">Add a Park</a>
+      <a class="hp-nav-only-mobile" href="/about.html">About us</a>
+    </div>
+    <div class="hp-nav-actions">
+      <a class="hp-nav-cta" href="/submit.html"><span class="ms" aria-hidden="true">add_location</span> Add a Park</a>
+      <button class="hp-nav-toggle" id="nav-toggle" type="button" aria-expanded="false"
+              aria-controls="site-nav" aria-label="Menu">
+        <span class="ms" aria-hidden="true">menu</span>
+      </button>
+    </div>
+  </div>
+</nav>
 
 <div class="wizard-wrap" style="max-width:1200px;padding-bottom:0">
-  <p style="margin:0.4rem 0"><a href="/#explore">Explore</a> › <span id="crumb">Location</span></p>
+  <p style="margin:0.4rem 0"><a href="/explore.html">Explore</a> › <span id="crumb">Location</span></p>
 </div>
 
 <main class="detail-wrap" id="detail" aria-live="polite">
@@ -31,7 +41,7 @@
 
 <footer class="site-footer">
   <div><a class="brand" href="/">Ontario Playground</a><br><small>Empowering families to find joy and safety in every outdoor adventure.</small></div>
-  <div><a href="/about.html">About</a> · <a href="/submit.html">Add a Park</a></div>
+  <div class="footer-links"><a href="/explore.html">Find a Park</a> · <a href="/about.html">About</a> · <a href="/submit.html">Add a Park</a> · <a href="/about.html#privacy">Privacy</a> · <a href="/api/docs">API</a> · <a class="footer-admin" href="/admin.html">Staff sign in</a></div>
 </footer>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"

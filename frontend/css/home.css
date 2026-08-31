@@ -1,0 +1,396 @@
+/* =========================================================================
+   Ontario Playground — home page (Stitch rebuild)
+
+   Loaded AFTER style.css, which supplies the design tokens, header and button
+   base. Every class here is prefixed `hp-` so nothing collides with the rules
+   the current index.html still depends on, and the final swap is a rename
+   rather than a merge.
+   ========================================================================= */
+
+:root {
+  /* Display face = DESIGN.md's Plus Jakarta Sans (inherited from style.css). */
+  --hp-font-display: var(--font-head);
+
+  /* Section backgrounds, read off the mockup top to bottom. */
+  --hp-bg-cream: #f9f8f4;
+  --hp-bg-white: #ffffff;
+  --hp-bg-warm: #f4f4f0;
+
+  /* Card tints — the blue and lavender cards in the bento. */
+  --hp-tint-blue: #dde5ee;
+  --hp-tint-lavender: #ece0f5;
+
+  /* Bright pill green for the hero's primary action. */
+  --hp-lime: #86fd68;
+
+  --hp-on-lime: #137500;        /* on-secondary-container */
+  --hp-footer-dim: #bccca9;     /* primary-fixed-dim */
+}
+
+/* ---- Page scaffolding ---------------------------------------------------- */
+.hp-page { background: var(--hp-bg-cream); }
+
+.hp-section { padding: 96px 0; }
+.hp-section.is-white { background: var(--hp-bg-white); }
+.hp-section.is-warm { background: var(--hp-bg-warm); }
+.hp-section.is-cream { background: var(--hp-bg-cream); }
+
+.hp-container {
+  /* width:100% matters inside the hero: `margin: 0 auto` on a *grid* item makes
+     it shrink-to-fit and centre rather than stretch, which collapsed the
+     container and pushed the hero copy into the middle of the page. */
+  width: 100%; max-width: var(--hp-container); margin-inline: auto;
+  padding-inline: var(--hp-gutter-m);
+}
+
+/* ---- Type ---------------------------------------------------------------- */
+.hp-page h1, .hp-page h2, .hp-page h3, .hp-display {
+  font-family: var(--hp-font-display);
+  font-weight: 700; letter-spacing: -0.015em; line-height: 1.15;
+  color: var(--forest);
+}
+
+/* Small title-case label above a section (mockup: "Explore Your Community"). */
+.hp-label {
+  font-family: var(--hp-font-display); font-size: 1.02rem; font-weight: 600;
+  color: var(--forest); margin: 0 0 0.15rem;
+}
+/* Grey sub-line under the label. */
+.hp-sub { color: var(--muted); font-size: 0.92rem; margin: 0; }
+
+/* Green uppercase eyebrow (mockup: "PLAYGROUND DISCOVERY"). */
+.hp-eyebrow {
+  font-family: var(--font-body); font-size: 0.72rem; font-weight: 700;
+  letter-spacing: 0.12em; text-transform: uppercase; color: var(--secondary);
+  margin: 0 0 0.6rem;
+}
+
+/* ---- Image placeholder ---------------------------------------------------
+   Every photo slot on the page is one of these until real photography lands.
+   Set the shape with --ar; swapping in an <img> later is a one-line change. */
+.hp-ph {
+  position: relative; display: grid; place-items: center;
+  aspect-ratio: var(--ar, 16 / 9);
+  background: #e8e9e3;
+  border: 1px dashed #bcc0b4;
+  border-radius: var(--r-md);
+  color: #7b7f74; text-align: center;
+  font-family: var(--font-body); font-size: 0.78rem; font-weight: 600;
+  letter-spacing: 0.02em; padding: 0.5rem;
+}
+.hp-ph::before {
+  content: "image"; position: absolute; top: 0.5rem; left: 0.65rem;
+  font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase;
+  color: #a0a496;
+}
+
+/* ---- Step 0 scaffold blocks (temporary) ----------------------------------
+   Placeholder outlines so the page rhythm and backgrounds can be reviewed
+   before any section is built. Removed section by section. */
+.hp-slot {
+  border: 2px dashed #c5c8bd; border-radius: var(--r-lg);
+  min-height: 260px; display: grid; place-items: center;
+  color: var(--muted); font-family: var(--font-body); font-weight: 600;
+}
+.hp-slot small { display: block; font-weight: 400; opacity: 0.75; margin-top: 0.3rem; }
+
+/* ---- Hero ----------------------------------------------------------------
+   Stitch: h-[870px] min-h-[600px], copy in a max-w-2xl block, and a light
+   left-to-right scrim that tops out at 60% — the photograph stays readable
+   all the way across. */
+.hp-hero {
+  position: relative; height: 870px; min-height: 600px;
+  display: flex; align-items: center; overflow: hidden; color: #fff;
+}
+.hp-hero-img {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; object-position: 50% 50%; z-index: 0;
+}
+.hp-hero::after {
+  content: ""; position: absolute; inset: 0; z-index: 1;
+  background: linear-gradient(to right, rgba(43, 56, 31, 0.6), transparent);
+}
+.hp-hero > .hp-container { position: relative; z-index: 2; }
+.hp-hero-body { max-width: 42rem; }          /* Tailwind max-w-2xl */
+.hp-hero h1 {
+  font-family: var(--font-head); font-size: 40px; font-weight: 400;
+  line-height: 1.25; letter-spacing: normal; color: #fff; margin: 0 0 24px;
+}
+.hp-hero p {
+  font-family: var(--font-body); font-size: 18px; font-weight: 400;
+  line-height: 1.625; opacity: 0.9; margin: 0 0 40px; color: #fff;
+}
+.hp-hero-actions { display: flex; flex-direction: column; gap: 16px; }
+
+.hp-hero-actions .hp-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 12px;
+  padding: 16px 32px; border-radius: var(--r-pill);
+  font-family: var(--font-head); font-size: 16px; font-weight: 400;
+  text-decoration: none; border: 0; cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s;
+}
+.hp-btn-lime {
+  background: var(--hp-lime); color: var(--hp-on-lime);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+}
+.hp-btn-lime:hover { box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); transform: translateY(-4px); }
+/* Light glass, not a dark pill — this is what reads as "transparent" over the photo. */
+.hp-btn-glass {
+  background: rgba(255, 255, 255, 0.2); color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+}
+.hp-btn-glass:hover { background: rgba(255, 255, 255, 0.3); }
+
+@media (min-width: 640px) {
+  .hp-hero-actions { flex-direction: row; }
+}
+@media (min-width: 768px) {
+  .hp-hero h1 { font-size: 64px; }
+  .hp-hero p { font-size: 22px; }
+}
+@media (max-width: 767px) {
+}
+
+/* ---- Explore bento -------------------------------------------------------
+   Stitch's grid verbatim: 4 columns x 2 rows of 300px, 24px gap, 32px radius.
+   The 2x2 slot holds the map instead of Stitch's photo card. */
+.hp-sec-head { margin-bottom: 48px; }
+.hp-sec-head h2 {
+  font-family: var(--font-head); font-size: 16px; font-weight: 400;
+  color: var(--forest); margin: 0 0 8px;
+}
+.hp-sec-head p {
+  font-family: var(--font-body); font-size: 16px; color: var(--muted); margin: 0;
+}
+
+.hp-bento {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(2, 300px);
+  gap: 24px;
+}
+.hp-bento > * { border-radius: 32px; }
+
+/* --- Map tile (2 x 2) --- */
+.hp-map-tile {
+  grid-column: span 2; grid-row: span 2;
+  /* z-index:0 (not auto) makes this a stacking context, so Leaflet's internal
+     panes — which run to z-index 1000 — stay trapped inside the tile instead of
+     painting over the fixed header when the map scrolls under it. */
+  position: relative; z-index: 0; overflow: hidden;
+  background: var(--mint);
+  border: 1px solid rgba(124, 169, 130, 0.18);
+}
+/* Decorative preview: it must never swallow the click. The OSM credit is the
+   one exception — Leaflet renders controls above the hit layer. */
+.hp-map-canvas { position: absolute; inset: 0; pointer-events: none; }
+.hp-map-canvas .leaflet-control-attribution {
+  pointer-events: auto; font-size: 11px; padding: 2px 8px;
+  background: rgba(255, 255, 255, 0.85); border-radius: 8px;
+  /* Inset from the 32px corner radius so the credit is never clipped. */
+  margin: 14px 18px 0 0; white-space: nowrap;
+}
+.hp-map-hit { position: absolute; inset: 0; z-index: 600; }
+.hp-map-bar {
+  pointer-events: none;                 /* label only; the hit layer owns clicks */
+  position: absolute; left: 24px; right: 24px; bottom: 24px; z-index: 500;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px; flex-wrap: wrap;
+  background: rgba(255, 255, 255, 0.95); border-radius: 16px;
+  padding: 16px 20px; box-shadow: var(--shadow-1);
+}
+.hp-map-count { font-family: var(--font-head); font-size: 16px; color: var(--forest); }
+.hp-map-go {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--font-body); font-size: 16px; font-weight: 700; color: var(--secondary);
+}
+.hp-map-go .ms { font-size: 20px; transition: transform 0.2s; }
+.hp-map-tile:has(.hp-map-hit:hover) .hp-map-go .ms { transform: translateX(4px); }
+.hp-map-tile:has(.hp-map-hit:focus-visible) { outline: 3px solid var(--age-toddler); outline-offset: 2px; }
+
+/* --- Category cards --- */
+.hp-card {
+  position: relative; overflow: hidden; padding: 32px;
+  display: flex; flex-direction: column;
+  text-decoration: none; color: inherit;
+  transition: box-shadow 0.2s;
+}
+.hp-card:hover { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1); }
+.hp-card h3 {
+  font-family: var(--font-head); font-size: 16px; font-weight: 400;
+  color: var(--forest); margin: 0;
+}
+.hp-card p { font-family: var(--font-body); font-size: 16px; color: var(--muted); margin: 0; }
+.hp-arrow { opacity: 0; transition: opacity 0.2s; }
+.hp-card:hover .hp-arrow, .hp-card:focus-visible .hp-arrow { opacity: 1; }
+
+/* Wide card (2 x 1): centred colour disc above the label, per Stitch. */
+.hp-card-wide { grid-column: span 2; justify-content: flex-end; }
+.hp-badge { flex-grow: 1; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; }
+.hp-badge .ms {
+  width: 96px; height: 96px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 48px; font-variation-settings: "FILL" 1;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s;
+}
+.hp-card-wide:hover .hp-badge .ms { transform: scale(1.1); }
+.hp-card-foot { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; }
+
+/* Small cards (1 x 1): icon top-left, arrow top-right, label at the bottom. */
+.hp-card-sm { justify-content: space-between; }
+.hp-card-head { display: flex; justify-content: space-between; align-items: flex-start; }
+.hp-card-head .hp-icon { font-size: 32px; }
+
+/* Type tints — 10% fill, 20% border, matching Stitch's /10 and /20 utilities. */
+.t-playground { background: rgba(155, 81, 224, 0.10); border: 1px solid rgba(155, 81, 224, 0.20); }
+.t-playground .hp-icon, .t-playground .hp-arrow { color: var(--age-preschool); }
+.t-playground .hp-badge .ms { background: var(--age-preschool); }
+
+.t-splash { background: rgba(74, 144, 226, 0.10); border: 1px solid rgba(74, 144, 226, 0.20); }
+.t-splash .hp-icon, .t-splash .hp-arrow { color: var(--age-toddler); }
+.t-splash .hp-badge .ms { background: var(--age-toddler); }
+
+.t-beach { background: rgba(243, 156, 18, 0.10); border: 1px solid rgba(243, 156, 18, 0.20); }
+.t-beach .hp-icon, .t-beach .hp-arrow { color: var(--age-school); }
+.t-beach .hp-badge .ms { background: var(--age-school); }
+
+@media (max-width: 767px) {
+  .hp-bento { grid-template-columns: 1fr; grid-template-rows: auto; gap: 16px; }
+  .hp-bento > * { grid-column: auto !important; grid-row: auto !important; }
+  .hp-map-tile { min-height: 320px; }
+  .hp-card { min-height: 220px; }
+  /* Touch has no hover, so the arrow would never appear. */
+  .hp-arrow { opacity: 1; }
+}
+
+/* ---- Community band ------------------------------------------------------
+   Stitch: forest panel + flush photo inside one 40px-radius container, stacked
+   below 1024px and side by side above it. */
+.hp-cta {
+  background: var(--forest); border-radius: 40px; overflow: hidden;
+  display: flex; flex-direction: column;
+}
+.hp-cta-copy {
+  flex: 1; padding: 48px; color: #fff;
+  display: flex; flex-direction: column; justify-content: center;
+}
+.hp-cta-copy h2 {
+  /* Stitch renders this at 16px because its `font-*` utilities set family only
+     and preflight resets heading size — which makes the heading identical to
+     the body copy. The hero shows the intended pattern: large *and* light. */
+  font-family: var(--font-head); font-size: 32px; font-weight: 400;
+  line-height: 1.25; color: #fff; margin: 0 0 24px;
+}
+.hp-cta-copy p {
+  font-family: var(--font-body); font-size: 16px; line-height: 1.625;
+  opacity: 0.8; margin: 0 0 40px; max-width: 46ch;
+}
+.hp-cta-actions { display: flex; gap: 16px; flex-wrap: wrap; }
+.hp-cta-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: #fff; color: var(--forest); text-decoration: none;
+  padding: 12px 32px; border-radius: var(--r-pill);
+  font-family: var(--font-body); font-size: 16px; font-weight: 600;
+  transition: background-color 0.2s;
+}
+.hp-cta-btn:hover { background: var(--hp-lime); }
+.hp-cta-btn .ms { font-size: 20px; }
+.hp-cta-media { flex: 1; min-height: 400px; }
+.hp-cta-media img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+@media (min-width: 1024px) {
+  .hp-cta { flex-direction: row; }
+  .hp-cta-copy { padding: 80px; }
+}
+@media (max-width: 767px) {
+  .hp-cta { border-radius: 24px; }
+  .hp-cta-copy { padding: 32px; }
+  .hp-cta-media { min-height: 240px; }
+}
+
+/* ---- Footer --------------------------------------------------------------
+   Stitch: forest bar, brand + copyright left, links right, stacked and centred
+   below 768px. */
+.hp-footer { background: var(--forest); padding: 48px 0; }
+.hp-footer-inner {
+  display: flex; flex-direction: column; align-items: center; gap: 32px;
+  width: 100%; max-width: var(--hp-container); margin-inline: auto;
+  padding-inline: var(--hp-gutter-m); text-align: center;
+}
+.hp-footer-brand { display: flex; flex-direction: column; gap: 16px; }
+.hp-footer-brand .hp-footer-name {
+  font-family: var(--font-head); font-size: 16px; font-weight: 400;
+  color: #fff; text-decoration: none;
+}
+.hp-footer-brand p {
+  font-family: var(--font-body); font-size: 14px; color: var(--hp-footer-dim); margin: 0;
+}
+.hp-footer-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 32px; }
+.hp-footer-links a {
+  font-family: var(--font-body); font-size: 14px; color: var(--hp-footer-dim);
+  text-decoration: none; transition: color 0.2s;
+}
+.hp-footer-links a:hover, .hp-footer-links a:focus-visible { color: var(--hp-lime); }
+
+@media (min-width: 768px) {
+  .hp-footer-inner {
+    flex-direction: row; justify-content: space-between; align-items: center;
+    gap: 0; text-align: left; padding-inline: var(--hp-gutter-d);
+  }
+  .hp-footer-brand { align-items: flex-start; }
+}
+
+@media (min-width: 768px) {
+  .hp-container { padding-inline: var(--hp-gutter-d); }
+}
+
+/* ---- Responsive refinements ---------------------------------------------
+   Stitch is desktop-first and leaves a few gaps on small screens; these close
+   them without changing the desktop design. */
+
+/* The fixed bar can grow to two rows once the menu opens, so the hero has to
+   clear whatever height it actually is rather than a guessed constant. */
+@media (max-width: 767px) {
+  /* A left-to-right scrim only shields the left edge. On a phone the copy spans
+     the full width, so the right half of every line sat on bare photo — switch
+     to a vertical wash that covers the whole column. */
+  .hp-hero::after {
+    background: linear-gradient(to bottom,
+      rgba(43, 56, 31, 0.62) 0%, rgba(43, 56, 31, 0.80) 55%, rgba(43, 56, 31, 0.88) 100%);
+  }
+  .hp-hero { height: auto; min-height: 560px; padding-block: 96px 56px; }
+  .hp-hero h1 { font-size: 34px; }
+  .hp-hero p { font-size: 18px; margin-bottom: 32px; opacity: 1; }
+  .hp-hero-actions .hp-btn { width: 100%; }
+
+  .hp-section { padding: 56px 0; }
+  .hp-sec-head { margin-bottom: 28px; }
+
+  .hp-cta-copy h2 { font-size: 26px; }
+  .hp-footer { padding: 40px 0; }
+}
+
+@media (max-width: 480px) {
+  .hp-hero { min-height: 500px; }
+  .hp-hero h1 { font-size: 30px; }
+  .hp-card { padding: 24px; min-height: 190px; }
+  .hp-badge .ms { width: 76px; height: 76px; font-size: 38px; }
+  .hp-map-bar { left: 14px; right: 14px; bottom: 14px; padding: 12px 14px; }
+  .hp-map-count, .hp-map-go { font-size: 14px; }
+  .hp-bento > * { border-radius: 24px; }
+}
+
+/* Tablet: two columns rather than one long stack. */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .hp-bento { grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(3, 260px); }
+  .hp-map-tile { grid-column: span 2; grid-row: span 1; }
+  .hp-card-wide { grid-column: span 2; }
+}
+
+/* Touch: hover-only affordances never appear, so give them a resting state. */
+@media (hover: none) {
+  .hp-card:hover { box-shadow: none; }
+  .hp-btn-lime:hover { transform: none; }
+}

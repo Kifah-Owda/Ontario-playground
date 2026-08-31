@@ -138,5 +138,58 @@ function escapeHtml(s) {
 function makeBaseMap(el, meta) {
   const map = L.map(el, { scrollWheelZoom: true }).setView(meta.map.start, meta.map.zoom);
   L.tileLayer(meta.map.tile_url, { attribution: meta.map.tile_attribution, maxZoom: 19 }).addTo(map);
+
+  // Leaflet measures the container once, at construction. On phones the shell
+  // is still settling (fonts, stacked grid, address bar) when that happens, so
+  // a map built against a zero-height box stays stuck at world zoom. Re-measure
+  // whenever the container actually changes size.
+  if (typeof ResizeObserver === "function") {
+    let seen = false;
+    new ResizeObserver(() => {
+      map.invalidateSize({ animate: false });
+      if (!seen && el.clientHeight > 0) {       // first real layout: restore the
+        seen = true;                            // intended view, not the fallback
+        map.setView(meta.map.start, meta.map.zoom, { animate: false });
+      }
+    }).observe(el);
+  }
+  window.addEventListener("orientationchange", () => {
+    setTimeout(() => map.invalidateSize({ animate: false }), 200);
+  });
   return map;
 }
+
+/* ---- Mobile navigation --------------------------------------------------
+   Shared by every page: the header collapses its links behind a toggle below
+   860px (see the matching breakpoint in style.css). */
+(function mobileNav() {
+  const wire = () => {
+    const btn = document.getElementById("nav-toggle");
+    const nav = document.getElementById("site-nav");
+    if (!btn || !nav) return;
+
+    const setOpen = (open) => {
+      btn.setAttribute("aria-expanded", String(open));
+      nav.dataset.open = String(open);
+      btn.querySelector(".ms").textContent = open ? "close" : "menu";
+    };
+    setOpen(false);
+
+    btn.addEventListener("click", () => {
+      setOpen(btn.getAttribute("aria-expanded") !== "true");
+    });
+    // Follow a link, then close, so the panel never covers the destination.
+    nav.addEventListener("click", (e) => { if (e.target.closest("a")) setOpen(false); });
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape") setOpen(false); });
+    // Widening past the breakpoint reveals the links again; drop the open state
+    // so the toggle and the panel never disagree.
+    matchMedia("(min-width: 861px)").addEventListener("change", (e) => {
+      if (e.matches) setOpen(false);
+    });
+  };
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", wire);
+  } else {
+    wire();
+  }
+})();

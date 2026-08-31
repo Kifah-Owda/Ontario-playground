@@ -24,7 +24,8 @@ async function init() {
   fillSelect("f-cond", state.meta.conditions);
   fillSelect("f-surface", state.meta.surfaces);
   wireControls();
-  wireCategoryCards();
+  wireFilterCollapse();
+  applyUrlFilters();
 
   state.parks = await API.get("/api/parks");
   buildMarkers();
@@ -55,6 +56,18 @@ function buildAgeChips() {
   }));
 }
 
+/* The filter panel is a <details>. Below the stacking breakpoint it collapses
+   so search and the map are reachable without scrolling past every chip; above
+   it, it is forced open and its summary is hidden by CSS. */
+function wireFilterCollapse() {
+  const card = document.getElementById("filter-card");
+  if (!card) return;
+  const mq = matchMedia("(max-width: 900px)");
+  const sync = () => { card.open = !mq.matches; };
+  sync();
+  mq.addEventListener("change", sync);
+}
+
 function fillSelect(id, values) {
   const sel = document.getElementById(id);
   values.forEach((v) => sel.append(new Option(v, v)));
@@ -81,15 +94,19 @@ function wireControls() {
   document.getElementById("clear-filters").addEventListener("click", clearFilters);
 }
 
-function wireCategoryCards() {
-  document.querySelectorAll(".cat-card").forEach((card) => card.addEventListener("click", () => {
-    clearFilters();
-    const t = card.dataset.cat;
+/* The landing page's category cards link here as /explore.html?type=beach, so
+   arriving with a type pre-selects the matching chip. Unknown values are
+   ignored rather than producing an empty result set with no visible cause. */
+function applyUrlFilters() {
+  const wanted = new URLSearchParams(location.search).getAll("type");
+  const valid = wanted.filter((t) => state.meta.location_types.includes(t));
+  if (!valid.length) return;
+
+  valid.forEach((t) => {
     state.f.types.add(t);
     const chip = document.querySelector(`#type-chips .chip[data-t="${t}"]`);
     if (chip) chip.setAttribute("aria-pressed", "true");
-    render();
-  }));
+  });
 }
 
 function clearFilters() {

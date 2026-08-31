@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Find a Park — Ontario Playground</title>
+<meta name="description" content="Search and filter accessible playgrounds, splash pads, and beaches across Ontario by age group, facilities, surfacing, and equipment condition.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Be+Vietnam+Pro:wght@400;600;700&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400,0,0&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha512-Zcn6bjR/8RZbLEpLIeOwNtzREBAJnUKESxces60Mpoj+2okopSAcSUIUOseddDm0cxnGQzxIR7vJgsLZbdLE3w==" crossorigin="anonymous">
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<nav class="hp-nav" aria-label="Main">
+  <div class="hp-nav-inner">
+    <a class="hp-brand" href="/">Ontario Playground</a>
+    <div class="hp-nav-links" id="site-nav">
+      <a class="is-current" href="/explore.html">Find a Park</a>
+      <!-- Phone-only: the header's action pill is hidden under 640px, so without
+           these there is no route to the form or the about page on a phone. -->
+      <a class="hp-nav-only-mobile" href="/submit.html">Add a Park</a>
+      <a class="hp-nav-only-mobile" href="/about.html">About us</a>
+    </div>
+    <div class="hp-nav-actions">
+      <a class="hp-nav-cta" href="/submit.html"><span class="ms" aria-hidden="true">add_location</span> Add a Park</a>
+      <button class="hp-nav-toggle" id="nav-toggle" type="button" aria-expanded="false"
+              aria-controls="site-nav" aria-label="Menu">
+        <span class="ms" aria-hidden="true">menu</span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<main id="explore" class="explore-wrap" aria-label="Explore locations">
+  <aside class="rail">
+   <div class="rail-top">
+    <div class="search-box">
+      <span class="ms" aria-hidden="true">search</span>
+      <input id="f-q" type="search" placeholder="Search parks, trails, or splash pads…" aria-label="Search by name">
+    </div>
+
+    <details class="card filter-card" id="filter-card" open>
+      <summary><span class="ms" aria-hidden="true">tune</span> Filters <span class="ms chev" aria-hidden="true">chevron_right</span></summary>
+      <h3 style="margin-bottom:0.5rem">Location type</h3>
+      <div class="chip-row" id="type-chips" role="group" aria-label="Location types"></div>
+      <h3 style="margin:0.9rem 0 0.5rem">Age groups</h3>
+      <div class="chip-row" id="age-chips" role="group" aria-label="Age groups"></div>
+      <h3 style="margin:0.9rem 0 0.5rem">Facilities &amp; accessibility</h3>
+      <div class="chip-row" id="fac-chips" role="group" aria-label="Facilities">
+        <button class="chip tog" data-f="accessible" aria-pressed="false"><span class="ms" aria-hidden="true">accessible</span> Accessible</button>
+        <button class="chip tog" data-f="washroom" aria-pressed="false"><span class="ms" aria-hidden="true">wc</span> Washroom</button>
+        <button class="chip tog" data-f="water" aria-pressed="false"><span class="ms" aria-hidden="true">water_drop</span> Water fountain</button>
+        <button class="chip tog" data-f="parking" aria-pressed="false"><span class="ms" aria-hidden="true">local_parking</span> Parking</button>
+        <button class="chip tog" data-f="shade" aria-pressed="false"><span class="ms" aria-hidden="true">park</span> Shade</button>
+        <button class="chip tog" data-f="fenced" aria-pressed="false"><span class="ms" aria-hidden="true">fence</span> Fenced</button>
+      </div>
+      <div class="form-grid" style="margin-top:0.9rem">
+        <div class="field">
+          <label for="f-cond">Equipment condition</label>
+          <select id="f-cond"><option value="">Any condition</option></select>
+        </div>
+        <div class="field">
+          <label for="f-surface">Surface type</label>
+          <select id="f-surface"><option value="">Any surface</option></select>
+        </div>
+      </div>
+      <label style="display:flex;gap:0.5rem;align-items:center;margin-top:0.8rem;font-size:0.9rem">
+        <input type="checkbox" id="f-extent" checked style="width:auto"> Filter by map view
+      </label>
+      <p style="margin:0.6rem 0 0"><button class="linkbtn" id="clear-filters">Clear all filters</button></p>
+    </details>
+   </div>
+
+   <div class="rail-bottom">
+    <div class="kpis" id="kpis" aria-live="polite"></div>
+
+    <div class="card">
+      <h3 style="display:flex;align-items:center;gap:0.4rem">Places <span class="mini-chip" id="count-pill">0</span></h3>
+      <div class="results" id="park-list" role="listbox" aria-label="Matching locations"></div>
+    </div>
+
+    <details class="insights card">
+      <summary><span class="ms" aria-hidden="true">chevron_right</span> Community Insights</summary>
+      <div class="chart-block"><h4>Playground equipment by age group</h4>
+        <canvas id="chart-type" height="190" role="img" aria-label="Bar chart of playground equipment types by age group"></canvas></div>
+      <div class="chart-block"><h4>Equipment condition</h4>
+        <canvas id="chart-cond" height="170" role="img" aria-label="Doughnut chart of equipment condition"></canvas></div>
+      <div class="chart-block"><h4>Surfacing</h4>
+        <canvas id="chart-surf" height="170" role="img" aria-label="Doughnut chart of surfacing materials"></canvas></div>
+    </details>
+   </div>
+  </aside>
+
+  <div class="map-panel">
+    <div id="map" aria-label="Map of locations"></div>
+    <div class="legend" aria-hidden="false">
+      <div><span class="shape circle"></span> Toddler<span class="lg-long"> (6–23 mo)</span></div>
+      <div><span class="shape diamond"></span> Preschool<span class="lg-long"> (2–5 yr)</span></div>
+      <div><span class="shape triangle"></span> School age<span class="lg-long"> (5–12 yr)</span></div>
+      <div><span class="ms" style="color:var(--forest)">water_drop</span> Splash pad</div>
+      <div><span class="ms" style="color:var(--forest)">beach_access</span> Beach</div>
+    </div>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div><a class="brand" href="/">Ontario Playground</a><br><small>Empowering families to find joy and safety in every outdoor adventure.</small></div>
+  <div class="footer-links"><a href="/explore.html">Find a Park</a> · <a href="/about.html">About</a> · <a href="/submit.html">Add a Park</a> · <a href="/about.html#privacy">Privacy</a> · <a href="/api/docs">API</a> · <a class="footer-admin" href="/admin.html">Staff sign in</a></div>
+</footer>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha512-BwHfrr4c9kmRkLw6iXFdzcdWV/PGkVgiIyIWLLlTSXzWQzxuSg4DiQUCpauz/EWjgk5TYQqX/kvn9pG1NpYfqg==" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script src="/js/common.js"></script>
+<script src="/js/explore.js"></script>
+</body>
+</html>
