@@ -107,7 +107,7 @@ function renderStats(all) {
 function card(p) {
   const rows = p.equipment
     .map(
-      (e) => `<tr><td>${shapeSpan(e.age_group)}</td><td>${escapeHtml(e.equipment_type)}</td>
+      (e) => `<tr><td><span class="age-chip age-${AGE_KEY[e.age_group] || "t"}">${escapeHtml(AGE_SHORT[e.age_group] || e.age_group)}</span></td><td>${escapeHtml(e.equipment_type)}</td>
         <td><span class="cond-pill" data-c="${escapeHtml(e.condition)}">${escapeHtml(e.condition)}</span></td>
         <td>${escapeHtml(e.notes || "")}</td></tr>`
     )

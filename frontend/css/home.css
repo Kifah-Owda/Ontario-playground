@@ -20,10 +20,8 @@
   --hp-tint-blue: #dde5ee;
   --hp-tint-lavender: #ece0f5;
 
-  /* Bright pill green for the hero's primary action. */
-  --hp-lime: #86fd68;
-
-  --hp-on-lime: #137500;        /* on-secondary-container */
+  /* --hp-lime / --hp-on-lime now live in style.css:root — the dashboard needs
+     them too, and this file is not loaded there. */
   --hp-footer-dim: #bccca9;     /* primary-fixed-dim */
 }
 
@@ -192,6 +190,11 @@
   margin: 14px 18px 0 0; white-space: nowrap;
 }
 .hp-map-hit { position: absolute; inset: 0; z-index: 600; }
+/* The shared marker is sized for the dashboard; scale it down for the tile.
+   transform-origin is the centre, which is also the Leaflet icon anchor, so
+   the pin stays over its coordinate. */
+.hp-map-canvas .park-marker { transform: scale(0.8); }
+
 .hp-map-bar {
   pointer-events: none;                 /* label only; the hit layer owns clicks */
   position: absolute; left: 24px; right: 24px; bottom: 24px; z-index: 500;
@@ -331,6 +334,11 @@
 .hp-footer-links a {
   font-family: var(--font-body); font-size: 14px; color: var(--hp-footer-dim);
   text-decoration: none; transition: color 0.2s;
+}
+/* WCAG 2.2 SC 2.5.8: these were 21px tall and too tightly packed to qualify
+   for the spacing exception. */
+.hp-footer-links a {
+  display: inline-flex; align-items: center; min-height: 24px; min-width: 24px;
 }
 .hp-footer-links a:hover, .hp-footer-links a:focus-visible { color: var(--hp-lime); }
 

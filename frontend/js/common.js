@@ -27,18 +27,24 @@ const API = {
 
 /* Location types (2026 recreation-location model) */
 const LOC_META = {
-  playground: { label: "Playground", icon: "attractions" },
-  splash_pad: { label: "Splash pad", icon: "water_drop" },
-  beach: { label: "Beach", icon: "beach_access" },
+  playground: { label: "Playground", plural: "Playgrounds", icon: "nature_people" },
+  splash_pad: { label: "Splash pad", plural: "Splash pads", icon: "water_drop" },
+  beach: { label: "Beach", plural: "Beaches", icon: "beach_access" },
 };
 function locLabel(t) { return (LOC_META[t] || LOC_META.playground).label; }
+/* Not label + "s" — that produced "Beachs". */
+function locPlural(t) { return (LOC_META[t] || LOC_META.playground).plural; }
 function locIcon(t) { return (LOC_META[t] || LOC_META.playground).icon; }
 
-/* Age groups: shapes carry the meaning; approved 2026 colours reinforce it. */
-const AGE_SHAPES = {
-  "Toddler (6-23 months)": "circle",
-  "Pre-schoolers (2-5 years)": "diamond",
-  "School-age (5-12 years)": "triangle",
+/* Age groups are labelled, never glyphed. The old circle/diamond/triangle set
+   needed a legend to decode, and a human-figure icon set would bake in
+   skin-tone and ability assumptions. Colour reinforces, text carries. */
+/* Short keys for the tinted filter chips; the darkened text colours they pair
+   with already exist in style.css as the .tag.age-* pairs. */
+const AGE_KEY = {
+  "Toddler (6-23 months)": "t",
+  "Pre-schoolers (2-5 years)": "p",
+  "School-age (5-12 years)": "s",
 };
 const AGE_SHORT = {
   "Toddler (6-23 months)": "Toddlers",
@@ -60,31 +66,26 @@ const CONDITION_COLORS = {
 };
 const SURFACE_COLORS = ["#b0793f", "#5fb3d9", "#e0c36b", "#8bbf7a", "#a58ad1", "#c9c9c9"];
 
-function shapeSpan(ageGroup) {
-  const cls = AGE_SHAPES[ageGroup] || "circle";
-  return `<span class="shape ${cls}" title="${escapeHtml(ageGroup)}" aria-hidden="true"></span>`;
-}
-function shapesFor(park) {
-  return (park.age_groups_present || []).map(shapeSpan).join("");
+/** Age groups as labelled, colour-tinted chips. Shared by the result cards
+    and the map popup so the two never drift. */
+function ageChipsHtml(park) {
+  return (park.age_groups_present || []).map((a) =>
+    `<span class="age-chip age-${AGE_KEY[a] || "t"}">${escapeHtml(AGE_SHORT[a] || a)}</span>`
+  ).join("");
 }
 
-/** Leaflet divIcon. Playgrounds: pill of age glyphs. Other types: icon pill. */
+/** Leaflet divIcon: a circular marker coloured by location type (Stitch).
+    A marker only has to say what kind of place this is — age groups moved to
+    the popup, where they can be labelled properly. */
 function parkIcon(park, highlighted) {
-  let inner, width;
-  if (park.location_type === "playground" || !park.location_type) {
-    const n = Math.max(1, (park.age_groups_present || []).length);
-    inner = shapesFor(park) || '<span class="shape circle" style="background:#9aa59d"></span>';
-    width = 16 * n + 14;
-  } else {
-    inner = `<span class="ms" aria-hidden="true">${locIcon(park.location_type)}</span>`;
-    width = 34;
-  }
+  const t = park.location_type || "playground";
+  const size = highlighted ? 38 : 30;
   return L.divIcon({
     className: "",
-    html: `<div class="park-marker${highlighted ? " hl" : ""}" role="img" aria-label="${escapeHtml(locLabel(park.location_type))}: ${escapeHtml(park.name)}">${inner}</div>`,
-    iconSize: [width, 24],
-    iconAnchor: [width / 2, 12],
-    popupAnchor: [0, -12],
+    html: `<div class="park-marker t-${t}${highlighted ? " hl" : ""}" role="img" aria-label="${escapeHtml(locLabel(t))}: ${escapeHtml(park.name)}"><span class="ms" aria-hidden="true">${locIcon(t)}</span></div>`,
+    iconSize: [size, size],
+    iconAnchor: [size / 2, size / 2],
+    popupAnchor: [0, -size / 2],
   });
 }
 
@@ -103,9 +104,9 @@ const A11Y_LABELS = {
 };
 const FACILITY_META = [
   ["washroom_nearby", "Washroom", "wc"],
-  ["water_fountains", "Water fountain", "water_drop"],
+  ["water_fountains", "Water fountain", "water_full"],
   ["parking", "Parking", "local_parking"],
-  ["shade", "Shade area", "park"],
+  ["shade", "Shade area", "nature"],
   ["fenced", "Fenced", "fence"],
   ["water_access", "Accessible water entry", "pool"],
 ];
@@ -114,18 +115,19 @@ function isAccessible(p) {
          p.accessible_surfacing === true;
 }
 
-/* Slim popup: summary + link to the detail page (2026 map behaviour). */
+/* Popup: name, age groups, Learn more. The marker no longer encodes age, so
+   the groups are spelled out here instead of shown as bare glyphs. */
 function popupHtml(park) {
-  const facts = [
-    locLabel(park.location_type),
-    park.city || "",
-    isAccessible(park) ? "♿ Accessible features" : "",
-  ].filter(Boolean).join(" · ");
+  const t = park.location_type || "playground";
+  const facts = [locLabel(t), park.city || "",
+                 isAccessible(park) ? "♿ Accessible features" : ""]
+    .filter(Boolean).join(" · ");
+  const ages = ageChipsHtml(park);
   return `<div class="popup">
     <h3>${escapeHtml(park.name)}</h3>
     <div class="sub">${escapeHtml(facts)}</div>
-    ${park.location_type === "playground" ? `<div>${shapesFor(park)}</div>` : ""}
-    <p style="margin:0.5rem 0 0"><a class="btn btn-primary btn-sm" href="/park.html?id=${park.id}">View details</a></p>
+    ${ages ? `<div class="age-chips">${ages}</div>` : ""}
+    <p style="margin:0.6rem 0 0"><a class="btn btn-primary btn-sm" href="/park.html?id=${park.id}">Learn more</a></p>
   </div>`;
 }
 

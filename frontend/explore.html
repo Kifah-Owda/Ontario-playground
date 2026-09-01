@@ -12,7 +12,7 @@
       integrity="sha512-Zcn6bjR/8RZbLEpLIeOwNtzREBAJnUKESxces60Mpoj+2okopSAcSUIUOseddDm0cxnGQzxIR7vJgsLZbdLE3w==" crossorigin="anonymous">
 <link rel="stylesheet" href="/css/style.css">
 </head>
-<body>
+<body class="app-shell">
 <nav class="hp-nav" aria-label="Main">
   <div class="hp-nav-inner">
     <a class="hp-brand" href="/">Ontario Playground</a>
@@ -43,46 +43,56 @@
 
     <details class="card filter-card" id="filter-card" open>
       <summary><span class="ms" aria-hidden="true">tune</span> Filters <span class="ms chev" aria-hidden="true">chevron_right</span></summary>
-      <h3 style="margin-bottom:0.5rem">Location type</h3>
-      <div class="chip-row" id="type-chips" role="group" aria-label="Location types"></div>
-      <h3 style="margin:0.9rem 0 0.5rem">Age groups</h3>
-      <div class="chip-row" id="age-chips" role="group" aria-label="Age groups"></div>
-      <h3 style="margin:0.9rem 0 0.5rem">Facilities &amp; accessibility</h3>
-      <div class="chip-row" id="fac-chips" role="group" aria-label="Facilities">
-        <button class="chip tog" data-f="accessible" aria-pressed="false"><span class="ms" aria-hidden="true">accessible</span> Accessible</button>
-        <button class="chip tog" data-f="washroom" aria-pressed="false"><span class="ms" aria-hidden="true">wc</span> Washroom</button>
-        <button class="chip tog" data-f="water" aria-pressed="false"><span class="ms" aria-hidden="true">water_drop</span> Water fountain</button>
-        <button class="chip tog" data-f="parking" aria-pressed="false"><span class="ms" aria-hidden="true">local_parking</span> Parking</button>
-        <button class="chip tog" data-f="shade" aria-pressed="false"><span class="ms" aria-hidden="true">park</span> Shade</button>
-        <button class="chip tog" data-f="fenced" aria-pressed="false"><span class="ms" aria-hidden="true">fence</span> Fenced</button>
+      <div class="filter-group">
+        <div class="chip-row" id="type-chips" role="group" aria-label="Location types"></div>
       </div>
-      <div class="form-grid" style="margin-top:0.9rem">
-        <div class="field">
-          <label for="f-cond">Equipment condition</label>
-          <select id="f-cond"><option value="">Any condition</option></select>
-        </div>
-        <div class="field">
-          <label for="f-surface">Surface type</label>
-          <select id="f-surface"><option value="">Any surface</option></select>
+      <div class="filter-group">
+        <div class="chip-row" id="age-chips" role="group" aria-label="Age groups"></div>
+      </div>
+      <div class="filter-group">
+        <div class="fac-row" id="fac-chips" role="group" aria-label="Facilities">
+          <!-- Icon-only. The .fac-label span is the button's accessible name AND
+               its hover/focus tooltip; below 900px (and on any hover-less
+               pointer) it becomes a visible inline label instead. -->
+          <button class="fac-btn" data-f="accessible" aria-pressed="false"><span class="ms" aria-hidden="true">accessible</span><span class="fac-label">Accessible</span></button>
+          <button class="fac-btn" data-f="washroom" aria-pressed="false"><span class="ms" aria-hidden="true">wc</span><span class="fac-label">Washroom</span></button>
+          <button class="fac-btn" data-f="parking" aria-pressed="false"><span class="ms" aria-hidden="true">local_parking</span><span class="fac-label">Parking</span></button>
+          <button class="fac-btn" data-f="shade" aria-pressed="false"><span class="ms" aria-hidden="true">nature</span><span class="fac-label">Shade</span></button>
+          <button class="fac-btn" data-f="fenced" aria-pressed="false"><span class="ms" aria-hidden="true">fence</span><span class="fac-label">Fenced</span></button>
         </div>
       </div>
-      <label style="display:flex;gap:0.5rem;align-items:center;margin-top:0.8rem;font-size:0.9rem">
-        <input type="checkbox" id="f-extent" checked style="width:auto"> Filter by map view
-      </label>
-      <p style="margin:0.6rem 0 0"><button class="linkbtn" id="clear-filters">Clear all filters</button></p>
+
+      <div class="filter-foot">
+        <details class="more-filters" id="more-filters">
+          <summary><span class="ms chev" aria-hidden="true">chevron_right</span> More filters</summary>
+          <div class="more-grid">
+            <div class="field">
+              <label for="f-cond">Equipment condition</label>
+              <select id="f-cond"><option value="">Any condition</option></select>
+            </div>
+            <div class="field">
+              <label for="f-surface">Surface type</label>
+              <select id="f-surface"><option value="">Any surface</option></select>
+            </div>
+            <label class="more-check">
+              <input type="checkbox" id="f-water"> Has a water fountain
+            </label>
+          </div>
+        </details>
+        <button class="linkbtn" id="clear-filters">Clear all</button>
+      </div>
     </details>
    </div>
 
    <div class="rail-bottom">
-    <div class="kpis" id="kpis" aria-live="polite"></div>
-
     <div class="card">
-      <h3 style="display:flex;align-items:center;gap:0.4rem">Places <span class="mini-chip" id="count-pill">0</span></h3>
+      <h3 class="results-head">Fun nearby <span class="mini-chip" id="count-pill">0</span></h3>
       <div class="results" id="park-list" role="listbox" aria-label="Matching locations"></div>
     </div>
 
     <details class="insights card">
       <summary><span class="ms" aria-hidden="true">chevron_right</span> Community Insights</summary>
+      <div class="kpis" id="kpis" aria-live="polite"></div>
       <div class="chart-block"><h4>Playground equipment by age group</h4>
         <canvas id="chart-type" height="190" role="img" aria-label="Bar chart of playground equipment types by age group"></canvas></div>
       <div class="chart-block"><h4>Equipment condition</h4>
@@ -95,20 +105,34 @@
 
   <div class="map-panel">
     <div id="map" aria-label="Map of locations"></div>
-    <div class="legend" aria-hidden="false">
-      <div><span class="shape circle"></span> Toddler<span class="lg-long"> (6–23 mo)</span></div>
-      <div><span class="shape diamond"></span> Preschool<span class="lg-long"> (2–5 yr)</span></div>
-      <div><span class="shape triangle"></span> School age<span class="lg-long"> (5–12 yr)</span></div>
-      <div><span class="ms" style="color:var(--forest)">water_drop</span> Splash pad</div>
-      <div><span class="ms" style="color:var(--forest)">beach_access</span> Beach</div>
+    <div class="legend" role="group" aria-label="Map legend">
+      <div><span class="lg-dot t-playground"></span> Playground</div>
+      <div><span class="lg-dot t-splash_pad"></span> Splash pad</div>
+      <div><span class="lg-dot t-beach"></span> Beach</div>
+    </div>
+
+    <div class="map-controls">
+      <button class="map-btn" id="btn-locate" type="button" aria-label="Centre the map on my location">
+        <span class="ms" aria-hidden="true">my_location</span>
+      </button>
+      <div class="map-zoom">
+        <button class="map-btn" id="btn-zoom-in" type="button" aria-label="Zoom in">
+          <span class="ms" aria-hidden="true">add</span>
+        </button>
+        <button class="map-btn" id="btn-zoom-out" type="button" aria-label="Zoom out">
+          <span class="ms" aria-hidden="true">remove</span>
+        </button>
+      </div>
     </div>
   </div>
 </main>
 
-<footer class="site-footer">
-  <div><a class="brand" href="/">Ontario Playground</a><br><small>Empowering families to find joy and safety in every outdoor adventure.</small></div>
-  <div class="footer-links"><a href="/explore.html">Find a Park</a> · <a href="/about.html">About</a> · <a href="/submit.html">Add a Park</a> · <a href="/about.html#privacy">Privacy</a> · <a href="/api/docs">API</a> · <a class="footer-admin" href="/admin.html">Staff sign in</a></div>
-</footer>
+<!-- Phone-only shortcut to the form. This page has no footer, so without it the
+     only route is the collapsed header menu. -->
+<a class="fab" href="/submit.html" aria-label="Add a park">
+  <span class="ms" aria-hidden="true">add</span>
+</a>
+
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
         integrity="sha512-BwHfrr4c9kmRkLw6iXFdzcdWV/PGkVgiIyIWLLlTSXzWQzxuSg4DiQUCpauz/EWjgk5TYQqX/kvn9pG1NpYfqg==" crossorigin="anonymous"></script>

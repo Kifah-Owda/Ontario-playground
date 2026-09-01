@@ -5,8 +5,11 @@
 const state = {
   meta: null, parks: [], map: null, markers: new Map(),
   charts: {},
+  /* `selected` is deliberately NOT a filter — it only sorts a park to the top
+     of the list, highlights it, and opens its popup. It used to short-circuit
+     parkMatches(), which made every other park fail and emptied the map. */
   f: { q: "", types: new Set(), ages: new Set(), facs: new Set(),
-       cond: "", surface: "", extent: true, selected: null },
+       cond: "", surface: "", selected: null },
 };
 
 init().catch((e) => {
@@ -17,7 +20,17 @@ init().catch((e) => {
 async function init() {
   state.meta = await API.get("/api/meta");
   state.map = makeBaseMap(document.getElementById("map"), state.meta);
-  state.map.on("moveend", () => { if (state.f.extent) render(); });
+  // Stitch supplies its own floating controls, and the attribution has to move
+  // out of the bottom-right corner to make room for them.
+  state.map.zoomControl.remove();
+  state.map.attributionControl.setPosition("bottomleft");
+  wireMapControls();
+  state.map.on("moveend", render);
+  // Clicking bare map (not a marker) clears the selection.
+  state.map.on("click", () => setSelected(null));
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") setSelected(null);
+  });
 
   buildTypeChips();
   buildAgeChips();
@@ -35,7 +48,7 @@ async function init() {
 function buildTypeChips() {
   const wrap = document.getElementById("type-chips");
   wrap.innerHTML = state.meta.location_types.map((t) =>
-    `<button class="chip" data-t="${t}" aria-pressed="false"><span class="ms" aria-hidden="true">${locIcon(t)}</span> ${locLabel(t)}s</button>`
+    `<button class="chip" data-t="${t}" aria-pressed="false"><span class="ms" aria-hidden="true">${locIcon(t)}</span> ${locPlural(t)}</button>`
   ).join("");
   wrap.querySelectorAll(".chip").forEach((b) => b.addEventListener("click", () => {
     toggleSet(state.f.types, b.dataset.t);
@@ -47,7 +60,7 @@ function buildTypeChips() {
 function buildAgeChips() {
   const wrap = document.getElementById("age-chips");
   wrap.innerHTML = state.meta.age_groups.map((a) =>
-    `<button class="chip" data-a="${escapeHtml(a)}" aria-pressed="false"><span class="dot" style="background:${AGE_COLORS[a]}"></span> ${AGE_SHORT[a] || a}</button>`
+    `<button class="chip chip-sm chip-age age-${AGE_KEY[a] || "t"}" data-a="${escapeHtml(a)}" aria-pressed="false">${AGE_SHORT[a] || a}</button>`
   ).join("");
   wrap.querySelectorAll(".chip").forEach((b) => b.addEventListener("click", () => {
     toggleSet(state.f.ages, b.dataset.a);
@@ -83,14 +96,16 @@ function wireControls() {
   document.getElementById("f-surface").addEventListener("change", (e) => {
     state.f.surface = e.target.value; state.f.selected = null; render();
   });
-  document.getElementById("f-extent").addEventListener("change", (e) => {
-    state.f.extent = e.target.checked; render();
-  });
-  document.querySelectorAll("#fac-chips .chip").forEach((b) => b.addEventListener("click", () => {
+  document.querySelectorAll("#fac-chips .fac-btn").forEach((b) => b.addEventListener("click", () => {
     toggleSet(state.f.facs, b.dataset.f);
     b.setAttribute("aria-pressed", state.f.facs.has(b.dataset.f));
     state.f.selected = null; render();
   }));
+  // Water fountain moved under "More filters" — same facs set, checkbox UI.
+  document.getElementById("f-water").addEventListener("change", (e) => {
+    e.target.checked ? state.f.facs.add("water") : state.f.facs.delete("water");
+    state.f.selected = null; render();
+  });
   document.getElementById("clear-filters").addEventListener("click", clearFilters);
 }
 
@@ -115,7 +130,8 @@ function clearFilters() {
   document.getElementById("f-q").value = "";
   document.getElementById("f-cond").value = "";
   document.getElementById("f-surface").value = "";
-  document.querySelectorAll(".chip[aria-pressed]").forEach((b) => b.setAttribute("aria-pressed", "false"));
+  document.getElementById("f-water").checked = false;
+  document.querySelectorAll("[aria-pressed]").forEach((b) => b.setAttribute("aria-pressed", "false"));
   render();
 }
 
@@ -123,7 +139,6 @@ function toggleSet(set, v) { set.has(v) ? set.delete(v) : set.add(v); }
 
 /* ---- Filtering ------------------------------------------------------------ */
 function parkMatches(p, bounds) {
-  if (state.f.selected && p.id !== state.f.selected) return false;
   if (state.f.q && !p.name.toLowerCase().includes(state.f.q)) return false;
   if (state.f.types.size && !state.f.types.has(p.location_type)) return false;
   if (state.f.surface && p.surfacing_material !== state.f.surface) return false;
@@ -160,36 +175,86 @@ function buildMarkers() {
 }
 
 function selectPark(id, { zoom = true } = {}) {
-  state.f.selected = state.f.selected === id ? null : id;
+  const next = state.f.selected === id ? null : id;   // clicking again deselects
   const p = state.parks.find((x) => x.id === id);
-  if (state.f.selected && p) {
+  state.f.selected = next;
+
+  if (next !== null && p) {
+    // setView fires moveend, which re-renders; render() sets the marker icons.
     if (zoom) state.map.setView([p.lat, p.lng], Math.max(state.map.getZoom(), 15));
     render();
     const m = state.markers.get(id);
-    if (m) { m.setIcon(parkIcon(p, true)); m.openPopup(); }
+    if (m) m.openPopup();
+    // The card is row 1 now - make sure the panel is actually showing it.
+    // behavior:"instant" because the global `scroll-behavior: smooth` would
+    // otherwise defer the scroll and desync anything measuring straight after.
+    const card = document.querySelector(".park-card.selected");
+    if (card) card.scrollIntoView({ block: "nearest", behavior: "instant" });
   } else {
     render();
   }
 }
 
+/* Single path for clearing/setting selection from non-card sources. */
+function setSelected(id) {
+  if (state.f.selected === id) return;
+  state.f.selected = id;
+  render();
+}
+
+/* Custom map controls (Stitch): locate + a stacked zoom pair, bottom-right. */
+function wireMapControls() {
+  document.getElementById("btn-zoom-in").addEventListener("click", () => state.map.zoomIn());
+  document.getElementById("btn-zoom-out").addEventListener("click", () => state.map.zoomOut());
+
+  const locate = document.getElementById("btn-locate");
+  locate.addEventListener("click", () => {
+    if (!navigator.geolocation) return;
+    locate.disabled = true;
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        locate.disabled = false;
+        state.map.setView([pos.coords.latitude, pos.coords.longitude], 14);
+      },
+      // Denied or unavailable: re-enable rather than leave the control stuck
+      // disabled with no explanation.
+      () => { locate.disabled = false; },
+      { enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 });
+  });
+}
+
+/* Fit the map around every park matching the current filters. */
+function fitAllMatching() {
+  const all = state.parks.filter((p) => parkMatches(p, null));
+  if (!all.length) return;
+  state.map.fitBounds(L.latLngBounds(all.map((p) => [p.lat, p.lng])), { padding: [40, 40] });
+}
+
 /* ---- Render ----------------------------------------------------------------- */
 function render() {
-  const bounds = state.f.extent ? state.map.getBounds() : null;
-  const visible = state.parks.filter((p) => parkMatches(p, bounds));
-  // Markers ignore the extent filter (the map IS the extent):
-  const markerVisible = state.parks.filter((p) => parkMatches(p, null));
+  const bounds = state.map.getBounds();
+  // Markers show every filter match - the map IS the extent, so clipping them
+  // to their own viewport would be circular.
+  const matching = state.parks.filter((p) => parkMatches(p, null));
+  // The list follows the map view. The selected park is force-included so that
+  // panning it off-screen never makes the thing you just clicked vanish.
+  const inView = matching.filter(
+    (p) => bounds.contains([p.lat, p.lng]) || p.id === state.f.selected);
+  // Selected sorts to the top; everything else keeps source order.
+  const sel = state.f.selected;
+  const listed = inView.slice().sort((a, b) => (b.id === sel) - (a.id === sel));
 
   for (const p of state.parks) {
     const m = state.markers.get(p.id);
-    const show = markerVisible.includes(p);
+    const show = matching.includes(p);
     if (show && !state.map.hasLayer(m)) m.addTo(state.map);
     if (!show && state.map.hasLayer(m)) m.remove();
-    if (show) m.setIcon(parkIcon(p, state.f.selected === p.id));
+    if (show) m.setIcon(parkIcon(p, sel === p.id));
   }
 
-  renderKpis(visible);
-  renderList(visible);
-  renderCharts(visible);
+  renderKpis(inView);
+  renderList(listed, matching.length - inView.length);
+  renderCharts(inView);
 }
 
 function renderKpis(parks) {
@@ -205,10 +270,13 @@ function renderKpis(parks) {
   document.getElementById("count-pill").textContent = parks.length;
 }
 
-function renderList(parks) {
+function renderList(parks, outsideCount = 0) {
   const wrap = document.getElementById("park-list");
   if (!parks.length) {
-    wrap.innerHTML = `<p class="notice info">No places match these filters yet. Try clearing a filter — or <a href="/submit.html">add the first one</a>!</p>`;
+    wrap.innerHTML = outsideCount
+      ? `<p class="notice info">No places in this map area.<br><button class="linkbtn" data-zoom-out>Zoom out to see all ${outsideCount}</button></p>`
+      : `<p class="notice info">No places match these filters yet. Try clearing a filter — or <a href="/submit.html">add the first one</a>!</p>`;
+    wireZoomOut(wrap);
     return;
   }
   wrap.innerHTML = parks.slice(0, 60).map((p) => {
@@ -216,11 +284,15 @@ function renderList(parks) {
     const img = photo
       ? `<img src="${photo.thumb_url}" alt="" loading="lazy">`
       : `<span class="ph"><span class="ms" aria-hidden="true">${locIcon(p.location_type)}</span></span>`;
+    // The type chip carries a dot in the marker's own colour, so a card and
+    // its pin read as the same thing. Facilities each get their own tint.
+    const t = p.location_type || "playground";
     const chips = [
-      `<span class="mini-chip">${locLabel(p.location_type)}</span>`,
+      `<span class="mini-chip"><span class="lg-dot t-${t}"></span> ${locLabel(t)}</span>`,
       isAccessible(p) ? `<span class="mini-chip a11y"><span class="ms">accessible</span> Access</span>` : "",
-      p.washroom_nearby === true ? `<span class="mini-chip ok"><span class="ms">wc</span> WC</span>` : "",
-      p.shade === true ? `<span class="mini-chip ok"><span class="ms">park</span> Shade</span>` : "",
+      p.washroom_nearby === true ? `<span class="mini-chip wc"><span class="ms">wc</span> WC</span>` : "",
+      p.shade === true ? `<span class="mini-chip ok"><span class="ms">nature</span> Shade</span>` : "",
+      ageChipsHtml(p),
     ].filter(Boolean).join("");
     return `<button class="park-card${state.f.selected === p.id ? " selected" : ""}" data-id="${p.id}" role="option" aria-selected="${state.f.selected === p.id}">
       ${img}
@@ -228,12 +300,20 @@ function renderList(parks) {
         <h3>${escapeHtml(p.name)}</h3>
         <span class="sub">${escapeHtml(p.address || p.city || "Ontario")}</span>
         <span class="mini-chips">${chips}</span>
-        ${p.location_type === "playground" ? `<span>${shapesFor(p)}</span>` : ""}
       </span>
     </button>`;
-  }).join("");
+  }).join("") + (outsideCount
+    ? `<p class="list-more"><span>${outsideCount} more outside this area</span>
+         <button class="linkbtn" data-zoom-out>Zoom out</button></p>`
+    : "");
   wrap.querySelectorAll(".park-card").forEach((el) =>
     el.addEventListener("click", () => selectPark(Number(el.dataset.id))));
+  wireZoomOut(wrap);
+}
+
+function wireZoomOut(wrap) {
+  wrap.querySelectorAll("[data-zoom-out]").forEach((b) =>
+    b.addEventListener("click", fitAllMatching));
 }
 
 /* Charts (Community Insights, collapsible) */
@@ -256,7 +336,8 @@ function renderCharts(parks) {
       })),
     },
     options: {
-      responsive: true, scales: { x: { stacked: true }, y: { stacked: true, ticks: { precision: 0 } } },
+      responsive: true, aspectRatio: 1.7,
+      scales: { x: { stacked: true }, y: { stacked: true, ticks: { precision: 0 } } },
       plugins: { legend: { position: "bottom", labels: { boxWidth: 12 } } },
     },
   });
@@ -278,7 +359,10 @@ function doughnut(id, labels, counts, colors) {
   upsertChart(id, {
     type: "doughnut",
     data: { labels: used, datasets: [{ data: used.map((l) => counts[l]), backgroundColor: colors.slice(0, used.length) }] },
-    options: { responsive: true, plugins: { legend: { position: "bottom", labels: { boxWidth: 12 } } } },
+    /* aspectRatio: without it Chart.js draws doughnuts square, so each one ran
+       the full width of the rail in height inside the Insights panel. */
+    options: { responsive: true, aspectRatio: 1.7,
+               plugins: { legend: { position: "bottom", labels: { boxWidth: 12 } } } },
   });
 }
 

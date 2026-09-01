@@ -38,10 +38,9 @@ function renderDetail(p, meta) {
     : `<div class="gallery-empty"><span class="ms" style="font-size:2.4rem" aria-hidden="true">${locIcon(p.location_type)}</span>
        <span>No photos yet — <a href="/submit.html?update=${p.id}">add some</a>!</span></div>`;
 
-  const ageTags = (p.age_groups_present || []).map((a) => {
-    const cls = { circle: "age-t", diamond: "age-p", triangle: "age-s" }[AGE_SHAPES[a]];
-    return `<span class="tag ${cls}">${shapeSpan(a)} ${AGE_SHORT[a] || a}</span>`;
-  }).join("");
+  const ageTags = (p.age_groups_present || []).map((a) =>
+    `<span class="tag age-${AGE_KEY[a] || "t"}">${escapeHtml(AGE_SHORT[a] || a)}</span>`
+  ).join("");
 
   const amenities = FACILITY_META.map(([key, label, icon]) => {
     let v = p[key];
@@ -58,7 +57,7 @@ function renderDetail(p, meta) {
 
   const equip = (p.equipment || []).map((e) => `
     <div class="equip-card">
-      <span>${shapeSpan(e.age_group)} <small>${AGE_SHORT[e.age_group] || ""}</small></span>
+      <span class="age-chip age-${AGE_KEY[e.age_group] || "t"}">${escapeHtml(AGE_SHORT[e.age_group] || e.age_group)}</span>
       <b>${escapeHtml(e.equipment_type)}</b>
       <span class="cond-pill" data-c="${escapeHtml(e.condition)}">${escapeHtml(e.condition)}</span>
       ${e.notes ? `<small>${escapeHtml(e.notes)}</small>` : ""}
